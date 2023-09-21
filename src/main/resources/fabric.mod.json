@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "wbshop",
+  "version": "${version}",
+  "name": "wbshop",
+  "description": "",
+  "authors": [],
+  "contact": {
+    "repo": "https://github.com/skycatminepokie/wbshop"
+  },
+  "license": "MIT",
+  "icon": "assets/wbshop/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.skycat.wbshop.client.WbshopClient"
+    ],
+    "main": [
+      "com.skycat.wbshop.Wbshop"
+    ]
+  },
+  "mixins": [
+    "wbshop.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
