@@ -12,11 +12,8 @@
   "icon": "assets/wbshop/icon.png",
   "environment": "*",
   "entrypoints": {
-    "client": [
-      "com.skycat.wbshop.client.WbshopClient"
-    ],
     "main": [
-      "com.skycat.wbshop.Wbshop"
+      "com.skycat.wbshop.WBShop"
     ]
   },
   "mixins": [
