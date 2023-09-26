@@ -33,8 +33,8 @@ public class WBShopAccount implements EconomyAccount {
     }
 
     @Override
-    public Identifier id() {
-        return Identifier.of(WBShop.MOD_ID, "account_" + owner);
+    public Identifier id() { // I believe this is the type of account this is
+        return defaultId();
     }
 
     @Override
@@ -87,9 +87,12 @@ public class WBShopAccount implements EconomyAccount {
                 Text.of("Too rich! (would have negative balance)"),
                 balance,
                 balance,
-                value, // TODO: Make sure this is right and it's not supposed to be 0
+                value, // Hopefully this is right and it's not supposed to be 0
                 this
         );
+    }
+    public static Identifier defaultId() {
+        return Identifier.of(WBShop.MOD_ID, "points_account");
     }
 
 }
