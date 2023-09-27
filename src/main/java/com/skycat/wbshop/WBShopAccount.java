@@ -1,15 +1,17 @@
 package com.skycat.wbshop;
 
-import eu.pb4.common.economy.api.EconomyAccount;
-import eu.pb4.common.economy.api.EconomyCurrency;
-import eu.pb4.common.economy.api.EconomyProvider;
-import eu.pb4.common.economy.api.EconomyTransaction;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import eu.pb4.common.economy.api.*;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Uuids;
+import net.minecraft.util.dynamic.Codecs;
 
 import java.util.UUID;
 
 public class WBShopAccount implements EconomyAccount {
+
     private final UUID owner;
     private long balance;
     private final EconomyProvider provider;
