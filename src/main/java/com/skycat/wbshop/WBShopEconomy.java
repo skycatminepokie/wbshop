@@ -41,8 +41,8 @@ public class WBShopEconomy extends PersistentState {
     public static WBShopEconomy readFromNbt(NbtCompound nbt) {
         var result = CODEC.decode(NbtOps.INSTANCE, nbt.get("economy")).result();
         if (result.isEmpty()) {
-            Utils.log("Well darn. WBShop couldn't load the economy - Codec returned empty result.");
-            throw new RuntimeException("WBShop couldn't load the economy - Codec returned empty result.");
+            Utils.log("WBShop couldn't load the economy. This is normal when you start a new world.");
+            return null;
         }
         return result.get().getFirst();
     }
