@@ -25,28 +25,6 @@ public class Utils {
         return Utils.pairCodec(keyCodec, keyFieldName, valueCodec, valueFieldName).listOf().xmap(Utils::pairsToMap, Utils::mapToPairs);
     }
 
-    private static <K, V> HashMap<K, V> pairsToMap(List<Pair<K, V>> pairs) {
-        HashMap<K, V> map = new HashMap<>(/*pairs.size()*/);
-        for (Pair<K, V> pair : pairs) {
-            map.put(pair.getFirst(), pair.getSecond());
-        }
-        return map;
-    }
-
-    public static <K, V> LinkedList<Pair<K, V>> mapToPairs(Map<K, V> map) {
-        LinkedList<Pair<K, V>> list = new LinkedList<>();
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            list.add(mapEntryToPair(entry));
-        }
-        return list;
-    }
-
-    public static <K, V> Pair<K, V> mapEntryToPair(Map.Entry<K, V> entry) {
-        return Pair.of(entry.getKey(), entry.getValue());
-    }
-    public static <F, S> Codec<Pair<F,S>> pairCodec(Codec<F> firstCodec, String firstFieldName, Codec<S> secondCodec, String secondFieldName) {
-        return Codec.pair(firstCodec.fieldOf(firstFieldName).codec(), secondCodec.fieldOf(secondFieldName).codec());
-    }
     public static boolean log(String msg) {
         return log(msg, LogLevel.INFO, WBShop.LOGGER);
     }
@@ -61,11 +39,44 @@ public class Utils {
 
     public static boolean log(String msg, LogLevel level, Logger logger) { // This and all overloads come from Mystical
         switch (level) {
-            case INFO: logger.info(msg); return logger.isInfoEnabled();
-            case DEBUG: logger.debug(msg); return logger.isDebugEnabled();
-            case WARN: logger.warn(msg); return logger.isWarnEnabled();
-            case ERROR: logger.error(msg); return logger.isErrorEnabled();
-            default: return false; // case OFF
+            case INFO:
+                logger.info(msg);
+                return logger.isInfoEnabled();
+            case DEBUG:
+                logger.debug(msg);
+                return logger.isDebugEnabled();
+            case WARN:
+                logger.warn(msg);
+                return logger.isWarnEnabled();
+            case ERROR:
+                logger.error(msg);
+                return logger.isErrorEnabled();
+            default:
+                return false; // case OFF
         }
+    }
+
+    public static <K, V> Pair<K, V> mapEntryToPair(Map.Entry<K, V> entry) {
+        return Pair.of(entry.getKey(), entry.getValue());
+    }
+
+    public static <K, V> LinkedList<Pair<K, V>> mapToPairs(Map<K, V> map) {
+        LinkedList<Pair<K, V>> list = new LinkedList<>();
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            list.add(mapEntryToPair(entry));
+        }
+        return list;
+    }
+
+    public static <F, S> Codec<Pair<F, S>> pairCodec(Codec<F> firstCodec, String firstFieldName, Codec<S> secondCodec, String secondFieldName) {
+        return Codec.pair(firstCodec.fieldOf(firstFieldName).codec(), secondCodec.fieldOf(secondFieldName).codec());
+    }
+
+    private static <K, V> HashMap<K, V> pairsToMap(List<Pair<K, V>> pairs) {
+        HashMap<K, V> map = new HashMap<>(/*pairs.size()*/);
+        for (Pair<K, V> pair : pairs) {
+            map.put(pair.getFirst(), pair.getSecond());
+        }
+        return map;
     }
 }

@@ -20,33 +20,20 @@ public class WBShopEconomy extends PersistentState {
     public static final Codec<WBShopEconomy> CODEC = RecordCodecBuilder.create(economy -> economy.group(
             Codec.INT.fieldOf("configVersion").forGetter(WBShopEconomy::getConfigVersion),
             ACCOUNTS_CODEC.fieldOf("accounts").forGetter(WBShopEconomy::getAccounts)
-
     ).apply(economy, WBShopEconomy::new));
-            @Getter
+    @Getter
     private HashMap<UUID, Long> accounts = new HashMap<>();
     @Getter
     private int configVersion = 0;
 
 
-    @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
-        var encodedResult = CODEC.encode(this, NbtOps.INSTANCE, NbtOps.INSTANCE.empty()).result();
-        if (encodedResult.isEmpty()) {
-            Utils.log("Well crud. WBShop couldn't save the economy.");
-            throw new RuntimeException("WBShop couldn't save the economy - Codec returned empty result.");
-        }
-        nbt.put("economy", encodedResult.get());
-        return nbt;
-    }
-
-    public WBShopEconomy() {
-    }
+    public WBShopEconomy() {}
 
     public WBShopEconomy(HashMap<UUID, Long> accounts) {
         this.accounts = accounts;
     }
 
-    public WBShopEconomy( int configVersion, HashMap<UUID, Long> accounts) {
+    public WBShopEconomy(int configVersion, HashMap<UUID, Long> accounts) {
         this.accounts = accounts;
         this.configVersion = configVersion;
     }
@@ -58,5 +45,16 @@ public class WBShopEconomy extends PersistentState {
             throw new RuntimeException("WBShop couldn't load the economy - Codec returned empty result.");
         }
         return result.get().getFirst();
+    }
+
+    @Override
+    public NbtCompound writeNbt(NbtCompound nbt) {
+        var encodedResult = CODEC.encode(this, NbtOps.INSTANCE, NbtOps.INSTANCE.empty()).result();
+        if (encodedResult.isEmpty()) {
+            Utils.log("Well crud. WBShop couldn't save the economy.");
+            throw new RuntimeException("WBShop couldn't save the economy - Codec returned empty result.");
+        }
+        nbt.put("economy", encodedResult.get());
+        return nbt;
     }
 }
