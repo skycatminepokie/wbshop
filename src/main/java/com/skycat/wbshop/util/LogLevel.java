@@ -1,4 +1,4 @@
-package com.skycat.wbshop;
+package com.skycat.wbshop.util;
 
 public enum LogLevel { // From Mystical. Should be replaced by an API.
     OFF(0),

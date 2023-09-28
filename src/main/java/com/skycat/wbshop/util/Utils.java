@@ -1,7 +1,8 @@
-package com.skycat.wbshop;
+package com.skycat.wbshop.util;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.skycat.wbshop.WBShop;
 import org.slf4j.Logger;
 
 import java.util.HashMap;

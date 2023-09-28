@@ -3,6 +3,7 @@ package com.skycat.wbshop;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.skycat.wbshop.util.Utils;
 import lombok.Getter;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
@@ -45,6 +46,7 @@ public class WBShopEconomy extends PersistentState {
         this.accounts = accounts;
         this.configVersion = configVersion;
     }
+
     /**
      * Gets the balance of a player.
      * @param player The player to get the balance of.
