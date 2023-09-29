@@ -1,10 +1,10 @@
-package com.skycat.wbshop;
+package com.skycat.wbshop.econ;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.skycat.wbshop.WBShop;
 import com.skycat.wbshop.util.Utils;
-import lombok.Getter;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -16,6 +16,7 @@ import java.util.UUID;
 
 /**
  * Represents and handles the points economy.
+ *
  * @author skycatminepokie
  */
 public class WBShopEconomy extends PersistentState {
@@ -31,12 +32,11 @@ public class WBShopEconomy extends PersistentState {
             Codec.INT.fieldOf("configVersion").forGetter(WBShopEconomy::getConfigVersion),
             ACCOUNTS_CODEC.fieldOf("accounts").forGetter(WBShopEconomy::getAccounts)
     ).apply(economy, WBShopEconomy::new));
-    @Getter
     private HashMap<UUID, Long> accounts = new HashMap<>();
-    @Getter
     private int configVersion = 0;
 
-    public WBShopEconomy() {}
+    public WBShopEconomy() {
+    }
 
     public WBShopEconomy(HashMap<UUID, Long> accounts) {
         this.accounts = accounts;
@@ -47,16 +47,26 @@ public class WBShopEconomy extends PersistentState {
         this.configVersion = configVersion;
     }
 
+    public HashMap<UUID, Long> getAccounts() {
+        return this.accounts;
+    }
+
     /**
-     * Gets the balance of a player.
+     * Gets the balance of a player, or makes an account for the player if they do not have one.
+     *
      * @param player The player to get the balance of.
      */
     public long getBalance(UUID player) {
+        if (!accounts.containsKey(player)) {
+            accounts.put(player, 0L);
+            return 0L;
+        }
         return accounts.get(player);
     }
 
     /**
      * Gets the balance of a player.
+     *
      * @param player The player to get the balance of.
      * @implNote Overload of {@link WBShopEconomy#getBalance(UUID)}.
      */
@@ -66,6 +76,7 @@ public class WBShopEconomy extends PersistentState {
 
     /**
      * Gets the balance of a player.
+     *
      * @param player The player to get the balance of.
      * @implNote Overload of {@link WBShopEconomy#getBalance(UUID)}.
      */
@@ -73,9 +84,14 @@ public class WBShopEconomy extends PersistentState {
         return getBalance(player.getId());
     }
 
+    public int getConfigVersion() {
+        return this.configVersion;
+    }
+
     /**
      * Sets the balance of a player.
-     * @param player The player to set the balance of.
+     *
+     * @param player  The player to set the balance of.
      * @param balance The balance to give the player.
      */
     private void setBalance(UUID player, long balance) {
@@ -85,7 +101,8 @@ public class WBShopEconomy extends PersistentState {
 
     /**
      * Sets the balance of a player.
-     * @param player The player to set the balance of.
+     *
+     * @param player  The player to set the balance of.
      * @param balance The balance to give the player.
      * @implNote Overload of {@link WBShopEconomy#setBalance(UUID, long)}.
      */
@@ -95,7 +112,8 @@ public class WBShopEconomy extends PersistentState {
 
     /**
      * Sets the balance of a player.
-     * @param player The player to set the balance of.
+     *
+     * @param player  The player to set the balance of.
      * @param balance The balance to give the player.
      * @implNote Overload of {@link WBShopEconomy#setBalance(UUID, long)}.
      */
@@ -105,7 +123,8 @@ public class WBShopEconomy extends PersistentState {
 
     /**
      * Adds to a player's balance.
-     * @param player The player to add points to.
+     *
+     * @param player  The player to add points to.
      * @param balance The number of points to add.
      * @return The player's new balance.
      */
@@ -117,7 +136,8 @@ public class WBShopEconomy extends PersistentState {
 
     /**
      * Adds to a player's balance.
-     * @param player The player to add points to.
+     *
+     * @param player  The player to add points to.
      * @param balance The number of points to add.
      * @return The player's new balance.
      * @implNote Overload of {@link WBShopEconomy#addBalance(UUID, long)}.
@@ -128,7 +148,8 @@ public class WBShopEconomy extends PersistentState {
 
     /**
      * Adds to a player's balance.
-     * @param player The player to add points to.
+     *
+     * @param player  The player to add points to.
      * @param balance The number of points to add.
      * @return The player's new balance.
      * @implNote Overload of {@link WBShopEconomy#addBalance(UUID, long)}.
@@ -139,7 +160,8 @@ public class WBShopEconomy extends PersistentState {
 
     /**
      * Removes from a player's balance.
-     * @param player The player to remove points from.
+     *
+     * @param player  The player to remove points from.
      * @param balance The number of points to remove.
      * @return The player's new balance.
      * @implNote Overload of {@link WBShopEconomy#addBalance(UUID, long)}.
@@ -150,7 +172,8 @@ public class WBShopEconomy extends PersistentState {
 
     /**
      * Removes from a player's balance.
-     * @param player The player to remove points from.
+     *
+     * @param player  The player to remove points from.
      * @param balance The number of points to remove.
      * @return The player's new balance.
      * @implNote Overload of {@link WBShopEconomy#removeBalance(UUID, long)}.
@@ -161,7 +184,8 @@ public class WBShopEconomy extends PersistentState {
 
     /**
      * Removes from a player's balance.
-     * @param player The player to remove points from.
+     *
+     * @param player  The player to remove points from.
      * @param balance The number of points to remove.
      * @return The player's new balance.
      * @implNote Overload of {@link WBShopEconomy#removeBalance(UUID, long)}.

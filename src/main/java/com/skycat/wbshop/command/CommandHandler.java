@@ -1,10 +1,16 @@
 package com.skycat.wbshop.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
+import com.skycat.wbshop.WBShop;
+import com.skycat.wbshop.gui.DonateGui;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -35,6 +41,7 @@ public class CommandHandler implements CommandRegistrationCallback {
         var bal = literal("bal")
                 .build(); // TODO
         var donate = literal("donate")
+                .executes(this::donate)
                 .build(); // TODO
         var withdraw = literal("withdraw")
                 .build(); // TODO
@@ -60,4 +67,24 @@ public class CommandHandler implements CommandRegistrationCallback {
             withdraw.addChild(withdrawAll);
 
     }
+
+    private int donate(CommandContext<ServerCommandSource> context) {
+        if (context.getSource().getEntity() instanceof ServerPlayerEntity player) {
+            new DonateGui(player).open();
+            return Command.SINGLE_SUCCESS;
+        }
+        context.getSource().sendError(Text.of("This command must be executed by a player!"));
+        return 0;
+    }
+
+    private int bal(CommandContext<ServerCommandSource> context) {
+        if (context.getSource().getEntity() instanceof ServerPlayerEntity player) {
+            context.getSource().sendFeedback(()-> Text.of("You have " + WBShop.ECONOMY.getBalance(player) + " points."), false);
+            return Command.SINGLE_SUCCESS;
+        }
+        context.getSource().sendError(Text.of("This command must be run by a player."));
+        return 0;
+    }
+
+
 }
