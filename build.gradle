@@ -29,6 +29,7 @@ dependencies {
 
     include(modImplementation('me.lucko:fabric-permissions-api:0.2-SNAPSHOT'))
     modImplementation include("eu.pb4:sgui:1.2.2+1.20")
+    modImplementation include("eu.pb4:common-economy-api:1.1.1")
 }
 
 processResources {

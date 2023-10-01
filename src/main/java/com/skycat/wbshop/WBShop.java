@@ -1,7 +1,7 @@
 package com.skycat.wbshop;
 
 import com.skycat.wbshop.command.CommandHandler;
-import com.skycat.wbshop.econ.WBShopEconomy;
+import com.skycat.wbshop.econ.Economy;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
@@ -16,7 +16,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
     /**
      * Null when world is remote or not loaded.
      */
-    public static WBShopEconomy ECONOMY = null;
+    public static Economy ECONOMY = null;
     private static final CommandHandler COMMAND_HANDLER = new CommandHandler();
 
     @Override
@@ -31,7 +31,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
             ECONOMY = null; // Potentially unnecessary? Not gonna mess with it though.
             return;
         }
-        ECONOMY = server.getOverworld().getPersistentStateManager().getOrCreate(WBShopEconomy::readFromNbt, WBShopEconomy::new, WBShopEconomy.SAVE_ID);
+        ECONOMY = server.getOverworld().getPersistentStateManager().getOrCreate(Economy::readFromNbt, Economy::new, Economy.SAVE_ID);
     }
 
 
