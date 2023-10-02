@@ -9,16 +9,16 @@ import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
-public class CurrentPointsIcon extends GuiElement {
+public class CurrentBalanceIcon extends GuiElement {
     /**
      * Makes an icon with no callback.
      * @param player Player that owns the points
      */
-    public CurrentPointsIcon(ServerPlayerEntity player) {
+    public CurrentBalanceIcon(ServerPlayerEntity player) {
         this(player, GuiElementInterface.EMPTY_CALLBACK);
     }
 
-    public CurrentPointsIcon(ServerPlayerEntity player, ClickCallback callback) {
+    public CurrentBalanceIcon(ServerPlayerEntity player, ClickCallback callback) {
         super(makeItemStack(player), callback);
     }
 

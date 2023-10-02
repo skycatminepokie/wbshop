@@ -5,10 +5,12 @@ import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.elements.GuiElementInterface;
 import eu.pb4.sgui.api.gui.SimpleGui;
+import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
@@ -18,29 +20,42 @@ import java.util.List;
 import java.util.Map;
 
 public class DonateGui extends SimpleGui {
-    public CurrentPointsIcon currentPointsIcon;
+    public CurrentBalanceIcon currentBalanceIcon;
     public GuiElement donationWorthIcon;
+    public GuiElement itemsDonatedIcon;
     public GuiElement autoDonateIcon;
+    private SimpleInventory donationInventory;
 
     /**
      * Constructs a new donation container gui for the supplied player.
      *
-     * @param player                the player to server this gui to
+     * @param player                The player to send this gui to
      */
     public DonateGui(ServerPlayerEntity player) {
         super(ScreenHandlerType.GENERIC_9X6, player, false);
         setLockPlayerInventory(false);
         setTitle(Text.of("Donate"));
-        currentPointsIcon = new CurrentPointsIcon(player);
+        currentBalanceIcon = new CurrentBalanceIcon(player);
         donationWorthIcon = new GuiElement(new ItemStack(Items.PAPER, 1), GuiElementInterface.EMPTY_CALLBACK); // TODO
+        itemsDonatedIcon = new GuiElementBuilder(Items.CHEST)
+                .setName(Text.of("Items donated: "+ WBShop.ECONOMY.getOrCreateAccount(player).getTotalItemsDonated()))
+                .build();
         autoDonateIcon = new GuiElementBuilder(Items.BARRIER)
                 .setName(Text.of("Coming eventually!"))
                 .build();
 
-        setSlot(0, currentPointsIcon);
-        setSlot(1, donationWorthIcon);
-        setupTopDonationIcons(2, 5);
+        setSlot(getFirstEmptySlot(), currentBalanceIcon);
+        setSlot(getFirstEmptySlot(), donationWorthIcon);
+        setupTopDonationIcons(getFirstEmptySlot(), 5);
         setSlot(8, autoDonateIcon);
+        donationInventory = new SimpleInventory(45); // 9 slots x 5 rows
+        int donationSlotNum = 0;
+        int emptySlot = getFirstEmptySlot();
+        while (emptySlot != -1) {
+            setSlotRedirect(getFirstEmptySlot(), new Slot(donationInventory, donationSlotNum, donationSlotNum % 9, donationSlotNum / 9));
+            donationSlotNum++;
+            emptySlot = getFirstEmptySlot();
+        }
     }
 
     private void setupTopDonationIcons(int startingIndex, int numberOfIcons) { // TODO: Optimize sort
@@ -53,7 +68,7 @@ public class DonateGui extends SimpleGui {
         for (int i = 0; i < numberOfIcons; i++) {
             int index = itemList.size() - i - 1;
             if (index < 0) {
-                setSlot(i + startingIndex, new GuiElementBuilder()
+                setSlot(getFirstEmptySlot(), new GuiElementBuilder()
                         .setItem(Items.BARRIER)
                         .setName(Text.of("Donate more items!"))
                         .setLore(List.of(Text.of("Your most donated items are shown here.")))
@@ -63,7 +78,7 @@ public class DonateGui extends SimpleGui {
             Map.Entry<Item, Long> entry = itemList.get(index); // Get the ith most donated item
             Item item = entry.getKey();
             Text name = item.getName().copy().append(" donated: " + entry.getValue());
-            setSlot(i + startingIndex, new GuiElementBuilder()
+            setSlot(getFirstEmptySlot(), new GuiElementBuilder()
                     .setItem(item)
                     .setName(name)
                     .build()

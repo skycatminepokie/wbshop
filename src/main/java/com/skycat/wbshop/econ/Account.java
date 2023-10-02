@@ -26,6 +26,7 @@ public class Account implements EconomyAccount {
      */
     private long balance;
     private final HashMap<Item, Long> donatedItemCounts;
+    private long totalItemsDonated;
 
     public static final Codec<Account> CODEC = RecordCodecBuilder.create((account) -> account.group(
             Uuids.CODEC.fieldOf("owner").forGetter(Account::owner),
@@ -65,6 +66,7 @@ public class Account implements EconomyAccount {
         long value = WBShop.ECONOMY.pointValueOf(stack);
         donatedItemCounts.put(stack.getItem(), current + stack.getCount());
         addBalance(value);
+        totalItemsDonated += stack.getCount(); // TODO: Better way - make a wrapper on hashmap
         return value;
     }
 
@@ -80,10 +82,18 @@ public class Account implements EconomyAccount {
         this.owner = owner;
         this.balance = balance;
         this.donatedItemCounts = donatedItemCounts;
+        totalItemsDonated = 0;
+        for (Long l : donatedItemCounts.values()) {
+            totalItemsDonated += l;
+        }
     }
 
     public void addBalance(long value) {
         setBalance(balance + value);
+    }
+
+    public long getTotalItemsDonated() {
+        return totalItemsDonated; // TODO
     }
 
     public void removeBalance(long value) {
