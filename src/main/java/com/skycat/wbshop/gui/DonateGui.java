@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DonateGui extends SimpleGui {
+public class DonateGui extends SimpleGui { // Slight problem: When force closed (portal, maybe death) items are not donated
     public CurrentBalanceIcon currentBalanceIcon;
     public GuiElement donationWorthIcon;
     public GuiElement itemsDonatedIcon;
@@ -45,9 +45,9 @@ public class DonateGui extends SimpleGui {
                 .build();
 
         setSlot(getFirstEmptySlot(), currentBalanceIcon);
-        setSlot(getFirstEmptySlot(), donationWorthIcon);
+        // setSlot(getFirstEmptySlot(), donationWorthIcon);
         setSlot(getFirstEmptySlot(), itemsDonatedIcon);
-        setupTopDonationIcons(getFirstEmptySlot(), 5);
+        setupTopDonationIcons(getFirstEmptySlot(), 6);
         setSlot(8, autoDonateIcon);
         donationInventory = new SimpleInventory(45); // 9 slots x 5 rows
         int donationSlotNum = 0;
