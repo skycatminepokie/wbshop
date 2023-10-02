@@ -2,32 +2,34 @@ package com.skycat.wbshop.gui;
 
 import com.skycat.wbshop.WBShop;
 import com.skycat.wbshop.util.Utils;
-import eu.pb4.sgui.api.ClickType;
 import eu.pb4.sgui.api.elements.GuiElement;
-import eu.pb4.sgui.api.gui.SlotGuiInterface;
+import eu.pb4.sgui.api.elements.GuiElementInterface;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
 public class CurrentPointsIcon extends GuiElement {
+    /**
+     * Makes an icon with no callback.
+     * @param player Player that owns the points
+     */
     public CurrentPointsIcon(ServerPlayerEntity player) {
-        super(makeItemStack(player), CurrentPointsIcon::onClicked);
+        this(player, GuiElementInterface.EMPTY_CALLBACK);
+    }
+
+    public CurrentPointsIcon(ServerPlayerEntity player, ClickCallback callback) {
+        super(makeItemStack(player), callback);
     }
 
     private static ItemStack makeItemStack(ServerPlayerEntity player) {
-        ItemStack stack = new ItemStack(Items.PAPER, 1);
+        ItemStack stack = new ItemStack(Items.PAPER, 1); // TODO: Make this player skull
         if (WBShop.ECONOMY != null) {
-            stack.setCustomName(Text.of("You have " + WBShop.ECONOMY.getBalance(player) + " points."));
+            stack.setCustomName(Text.of("You have " + WBShop.ECONOMY.getOrCreateAccount(player).balance() + " points."));
         } else {
             stack.setCustomName(Text.of("Error! Couldn't find how many points you have."));
             Utils.log("Couldn't create points stack for player " + player.getUuid() + ": Economy was null");
         }
         return stack;
-    }
-
-    static private void onClicked(int index, ClickType type, SlotActionType action, SlotGuiInterface gui) {
-
     }
 }
