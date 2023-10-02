@@ -65,7 +65,7 @@ public class Account implements EconomyAccount {
     public long donateItems(ItemStack stack) {
         if (stack.getItem() == Items.AIR) return 0;
         long current = donatedItemCounts.getOrDefault(stack.getItem(), 0L);
-        long value = WBShop.ECONOMY.pointValueOf(stack);
+        long value = WBShop.getEconomy().pointValueOf(stack);
         donatedItemCounts.put(stack.getItem(), current + stack.getCount());
         addBalance(value);
         totalItemsDonated += stack.getCount(); // TODO: Better way - make a wrapper on hashmap
@@ -141,12 +141,12 @@ public class Account implements EconomyAccount {
             WBShop.LOGGER.error("Something tried to set the value of account " + id() + " to " + value + ". Negatives are not allowed, defaulting to 0.");
             balance = 0;
         }
-        WBShop.ECONOMY.markDirty();
+        WBShop.getEconomy().markDirty();
     }
 
     @Override
     public EconomyProvider provider() {
-        return WBShop.ECONOMY;
+        return WBShop.getEconomy();
     }
 
     @Override

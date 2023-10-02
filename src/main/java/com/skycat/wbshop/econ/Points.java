@@ -29,6 +29,6 @@ public class Points implements EconomyCurrency {
 
     @Override
     public EconomyProvider provider() {
-        return WBShop.ECONOMY;
+        return WBShop.getEconomy();
     }
 }
