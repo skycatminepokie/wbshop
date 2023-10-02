@@ -9,18 +9,24 @@ import eu.pb4.common.economy.api.EconomyCurrency;
 import eu.pb4.common.economy.api.EconomyProvider;
 import eu.pb4.common.economy.api.EconomyTransaction;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
 public class Account implements EconomyAccount {
     private final UUID owner;
+    /**
+     * The balance of this account. Modify only via {@link Account#setBalance(long)}.
+     */
     private long balance;
     private final HashMap<Item, Long> donatedItemCounts;
+    private boolean dirty = false;
     public static final Codec<Account> CODEC = RecordCodecBuilder.create((account) -> account.group(
             Uuids.CODEC.fieldOf("owner").forGetter(Account::owner),
             Codec.LONG.fieldOf("balance").forGetter(Account::balance),
@@ -33,8 +39,45 @@ public class Account implements EconomyAccount {
     ).apply(account, Account::new));
 
 
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void markDirty() {
+        dirty = true;
+    }
+    
+    public void setDirty(boolean isDirty) {
+        dirty = isDirty;
+    }
+
     public HashMap<Item, Long> getDonatedItemCounts() {
         return donatedItemCounts;
+    }
+    /**
+     * Record items as donated and award points.
+     * @param items The stacks of items to donate.
+     * @return The number of points awarded for donating.
+     */
+    public long donateItems(Collection<ItemStack> items) {
+        long value = 0L;
+        for (ItemStack stack : items) {
+            value += donateItems(stack);
+        }
+        return value;
+    }
+
+    /**
+     * Record items as donated and award points.
+     * @param stack The stack of items to donate.
+     * @return The number of points awarded for donating.
+     */
+    public long donateItems(ItemStack stack) {
+        long current = donatedItemCounts.getOrDefault(stack.getItem(), 0L);
+        long value = WBShop.ECONOMY.pointValueOf(stack);
+        donatedItemCounts.put(stack.getItem(), current + stack.getCount());
+        addBalance(value);
+        return value;
     }
 
     public Account(UUID owner) {
@@ -49,6 +92,14 @@ public class Account implements EconomyAccount {
         this.owner = owner;
         this.balance = balance;
         this.donatedItemCounts = donatedItemCounts;
+    }
+
+    public void addBalance(long value) {
+        setBalance(balance + value);
+    }
+
+    public void removeBalance(long value) {
+        addBalance(-value);
     }
 
     //<editor-fold desc="Patbox's Economy API Handling">
@@ -104,7 +155,7 @@ public class Account implements EconomyAccount {
     public EconomyTransaction tryTransaction(long value) {
         if (balance + value >= 0){
             long old = balance;
-            balance += value;
+            addBalance(value);
             return new EconomyTransaction.Simple(true,
                     Text.of("Success!"),
                     balance,
