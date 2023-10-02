@@ -10,6 +10,7 @@ import eu.pb4.common.economy.api.EconomyCurrency;
 import eu.pb4.common.economy.api.EconomyProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
@@ -90,7 +91,7 @@ public class Economy extends PersistentState implements EconomyProvider {
     }
 
     public long pointValueOf(Item itemType) {
-        return 1; // TODO: Configurable
+        return (itemType == Items.AIR) ? 0 : 1; // TODO: Config
     }
 
     public int getConfigVersion() {

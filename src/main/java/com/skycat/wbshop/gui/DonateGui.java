@@ -46,6 +46,7 @@ public class DonateGui extends SimpleGui {
 
         setSlot(getFirstEmptySlot(), currentBalanceIcon);
         setSlot(getFirstEmptySlot(), donationWorthIcon);
+        setSlot(getFirstEmptySlot(), itemsDonatedIcon);
         setupTopDonationIcons(getFirstEmptySlot(), 5);
         setSlot(8, autoDonateIcon);
         donationInventory = new SimpleInventory(45); // 9 slots x 5 rows
@@ -86,4 +87,9 @@ public class DonateGui extends SimpleGui {
         }
     }
 
+    @Override
+    public void onClose() {
+        super.onClose();
+        WBShop.ECONOMY.getOrCreateAccount(player).donateItems(donationInventory.stacks);
+    }
 }

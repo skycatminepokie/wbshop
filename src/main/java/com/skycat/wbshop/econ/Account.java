@@ -10,6 +10,7 @@ import eu.pb4.common.economy.api.EconomyProvider;
 import eu.pb4.common.economy.api.EconomyTransaction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -62,6 +63,7 @@ public class Account implements EconomyAccount {
      * @return The number of points awarded for donating.
      */
     public long donateItems(ItemStack stack) {
+        if (stack.getItem() == Items.AIR) return 0;
         long current = donatedItemCounts.getOrDefault(stack.getItem(), 0L);
         long value = WBShop.ECONOMY.pointValueOf(stack);
         donatedItemCounts.put(stack.getItem(), current + stack.getCount());
@@ -93,7 +95,7 @@ public class Account implements EconomyAccount {
     }
 
     public long getTotalItemsDonated() {
-        return totalItemsDonated; // TODO
+        return totalItemsDonated;
     }
 
     public void removeBalance(long value) {
