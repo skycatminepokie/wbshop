@@ -20,6 +20,7 @@ import java.util.Map;
 public class DonateGui extends SimpleGui {
     public CurrentPointsIcon currentPointsIcon;
     public GuiElement donationWorthIcon;
+    public GuiElement autoDonateIcon;
 
     /**
      * Constructs a new donation container gui for the supplied player.
@@ -32,11 +33,14 @@ public class DonateGui extends SimpleGui {
         setTitle(Text.of("Donate"));
         currentPointsIcon = new CurrentPointsIcon(player);
         donationWorthIcon = new GuiElement(new ItemStack(Items.PAPER, 1), GuiElementInterface.EMPTY_CALLBACK); // TODO
-
+        autoDonateIcon = new GuiElementBuilder(Items.BARRIER)
+                .setName(Text.of("Coming eventually!"))
+                .build();
 
         setSlot(0, currentPointsIcon);
         setSlot(1, donationWorthIcon);
         setupTopDonationIcons(2, 5);
+        setSlot(8, autoDonateIcon);
     }
 
     private void setupTopDonationIcons(int startingIndex, int numberOfIcons) { // TODO: Optimize sort
@@ -52,7 +56,8 @@ public class DonateGui extends SimpleGui {
                 setSlot(i + startingIndex, new GuiElementBuilder()
                         .setItem(Items.BARRIER)
                         .setName(Text.of("Donate more items!"))
-                        .setLore(List.of(Text.of("Your most donated items are shown here."))));
+                        .setLore(List.of(Text.of("Your most donated items are shown here.")))
+                        .build());
                 continue;
             }
             Map.Entry<Item, Long> entry = itemList.get(index); // Get the ith most donated item
@@ -61,6 +66,7 @@ public class DonateGui extends SimpleGui {
             setSlot(i + startingIndex, new GuiElementBuilder()
                     .setItem(item)
                     .setName(name)
+                    .build()
             );
         }
     }
