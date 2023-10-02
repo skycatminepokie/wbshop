@@ -41,8 +41,7 @@ public class Economy extends PersistentState implements EconomyProvider {
     private final HashMap<UUID, Account> accounts = new HashMap<>(); // Keep it in a HashMap for fast lookup.
     private int configVersion = 0;
 
-    public Economy() {
-    }
+    public Economy() {}
 
     private Economy(int configVersion, List<Account> accountList) {
         this.configVersion = configVersion;
@@ -77,18 +76,6 @@ public class Economy extends PersistentState implements EconomyProvider {
         return accounts.values().stream().toList();
     }
 
-    public int getConfigVersion() {
-        return this.configVersion;
-    }
-
-    public static Economy readFromNbt(NbtCompound nbt) {
-        var result = CODEC.decode(NbtOps.INSTANCE, nbt.get("economy")).result();
-        if (result.isEmpty()) {
-            Utils.log("WBShop couldn't load the economy. This is normal when you start a new world.");
-            return null;
-        }
-        return result.get().getFirst();
-    }
 
     public long pointValueOf(Collection<ItemStack> stacks) {
         long sum = 0;
@@ -106,6 +93,20 @@ public class Economy extends PersistentState implements EconomyProvider {
         return 1; // TODO: Configurable
     }
 
+    public int getConfigVersion() {
+        return this.configVersion;
+    }
+
+    //<editor-fold desc="Serialization">
+    public static Economy readFromNbt(NbtCompound nbt) {
+        var result = CODEC.decode(NbtOps.INSTANCE, nbt.get("economy")).result();
+        if (result.isEmpty()) {
+            Utils.log("WBShop couldn't load the economy. This is normal when you start a new world.");
+            return null;
+        }
+        return result.get().getFirst();
+    }
+
     @Override
     public NbtCompound writeNbt(NbtCompound nbt) {
         var encodedResult = CODEC.encode(this, NbtOps.INSTANCE, NbtOps.INSTANCE.empty()).result();
@@ -116,6 +117,7 @@ public class Economy extends PersistentState implements EconomyProvider {
         nbt.put("economy", encodedResult.get());
         return nbt;
     }
+    //</editor-fold>
 
     //<editor-fold desc="Patbox's Common Economy API handling">
     @Override
