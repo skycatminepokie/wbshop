@@ -26,7 +26,7 @@ public class Account implements EconomyAccount {
      */
     private long balance;
     private final HashMap<Item, Long> donatedItemCounts;
-    private boolean dirty = false;
+
     public static final Codec<Account> CODEC = RecordCodecBuilder.create((account) -> account.group(
             Uuids.CODEC.fieldOf("owner").forGetter(Account::owner),
             Codec.LONG.fieldOf("balance").forGetter(Account::balance),
@@ -38,18 +38,6 @@ public class Account implements EconomyAccount {
             ).fieldOf("donatedItemCounts").forGetter(Account::getDonatedItemCounts)
     ).apply(account, Account::new));
 
-
-    public boolean isDirty() {
-        return dirty;
-    }
-
-    public void markDirty() {
-        dirty = true;
-    }
-    
-    public void setDirty(boolean isDirty) {
-        dirty = isDirty;
-    }
 
     public HashMap<Item, Long> getDonatedItemCounts() {
         return donatedItemCounts;
@@ -137,9 +125,11 @@ public class Account implements EconomyAccount {
     public void setBalance(long value) throws IllegalArgumentException {
         if (value >= 0) {
             balance = value;
+        } else {
+            WBShop.LOGGER.error("Something tried to set the value of account " + id() + " to " + value + ". Negatives are not allowed, defaulting to 0.");
+            balance = 0;
         }
-        WBShop.LOGGER.error("Something tried to set the value of account " + id() + " to " + value + ". Negatives are not allowed, defaulting to 0.");
-        balance = 0;
+        WBShop.ECONOMY.markDirty();
     }
 
     @Override
