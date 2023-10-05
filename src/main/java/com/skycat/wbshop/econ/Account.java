@@ -142,6 +142,7 @@ public class Account implements EconomyAccount {
             balance = 0;
         }
         WBShop.getEconomy().markDirty();
+        WBShop.updateBorder();
     }
 
     @Override

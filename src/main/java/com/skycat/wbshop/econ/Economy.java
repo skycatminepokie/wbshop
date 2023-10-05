@@ -77,6 +77,15 @@ public class Economy extends PersistentState implements EconomyProvider {
         return accounts.values().stream().toList();
     }
 
+    public long getTotalPoints() {
+        // TODO: This is awfully inefficient, it needs to be cached. Especially considering how much it's called.
+        long total = 0;
+        for (Account account : accounts.values()) {
+            total += account.balance();
+        }
+        return total;
+    }
+
 
     public long pointValueOf(Collection<ItemStack> stacks) {
         long sum = 0;
