@@ -11,7 +11,12 @@ import eu.pb4.common.economy.api.EconomyTransaction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtLong;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
@@ -116,6 +121,32 @@ public class Account implements EconomyAccount {
     @Override
     public Identifier id() { // I believe this is the type of account this is
         return defaultId();
+    }
+
+    /**
+     * Used for withdrawing points to a voucher.
+     * @param amount The amount to take from the player's account and grant as a voucher.
+     * @param player The player to grant the voucher to. This can be someone other than the account owner, but I don't see why you'd do that.
+     * @return {@code false} if the account does not have enough points, {@code true} on success.
+     */
+    public boolean withdraw(long amount, ServerPlayerEntity player) {
+        // TODO
+        if (amount > balance) return false;
+        ItemStack voucher = new ItemStack(Items.PAPER, 1);
+        voucher.setCustomName(Text.of("Point Voucher"));
+
+        NbtCompound nbt = new NbtCompound();
+        // NbtString#of apparently needs the JSON format of a Text in the form of a string
+        nbt.put("wbpoints", NbtLong.of(amount));
+
+        NbtList lore = new NbtList();
+        lore.add(NbtString.of(Text.Serializer.toJson(Text.of(amount + "point" + (amount == 1 ? "": "s")))));
+
+        voucher.getOrCreateSubNbt("display").put("Lore", lore);
+
+        player.getInventory().offerOrDrop(voucher);
+        removeBalance(amount);
+        return true;
     }
 
     @Override

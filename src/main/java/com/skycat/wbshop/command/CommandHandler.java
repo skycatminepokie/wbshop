@@ -2,16 +2,19 @@ package com.skycat.wbshop.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.skycat.wbshop.WBShop;
 import com.skycat.wbshop.gui.DonateGui;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
+import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 
@@ -26,23 +29,24 @@ public class CommandHandler implements CommandRegistrationCallback {
                 .build(); // TODO
         var econGet = literal("get")
                 .build(); // TODO
-        var players = literal("players")
-                .build(); // TODO, also should be arg
+        var players = argument("players", EntityArgumentType.players())
+                .build();
         var econAdd = literal("add")
                 .build(); // TODO
-        var playersPoints = literal("players")
-                .build(); // TODO, also should be arg
-        var points = literal("points")
-                .build(); // TODO, also should be arg
+        var playersPoints = argument("players", EntityArgumentType.players())
+                .build();
+        var points = argument("points", LongArgumentType.longArg())
+                .build();
         var econRemove = literal("remove")
                 .build(); // TODO
         var econTotal = literal("total")
                 .build(); // TODO
         var bal = literal("bal")
-                .build(); // TODO
+                .executes(this::bal)
+                .build();
         var donate = literal("donate")
                 .executes(this::donate)
-                .build(); // TODO
+                .build();
         var withdraw = literal("withdraw")
                 .build(); // TODO
         var withdrawAll = literal("all")

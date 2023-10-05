@@ -96,6 +96,7 @@ public class Economy extends PersistentState implements EconomyProvider {
     }
 
     public long pointValueOf(ItemStack stack) {
+        // TODO: Check nbt for points
         return stack.getCount() * pointValueOf(stack.getItem());
     }
 
