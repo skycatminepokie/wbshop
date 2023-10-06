@@ -138,9 +138,10 @@ public class Account implements EconomyAccount {
         NbtCompound nbt = new NbtCompound();
         // NbtString#of apparently needs the JSON format of a Text in the form of a string
         nbt.put("wbpoints", NbtLong.of(amount));
+        voucher.setNbt(nbt);
 
         NbtList lore = new NbtList();
-        lore.add(NbtString.of(Text.Serializer.toJson(Text.of(amount + "point" + (amount == 1 ? "": "s")))));
+        lore.add(NbtString.of(Text.Serializer.toJson(Text.of(amount + " point" + (amount == 1 ? "": "s")))));
 
         voucher.getOrCreateSubNbt("display").put("Lore", lore);
 

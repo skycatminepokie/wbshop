@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.skycat.wbshop.WBShop;
+import com.skycat.wbshop.econ.Account;
 import com.skycat.wbshop.gui.DonateGui;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
@@ -29,15 +30,19 @@ public class CommandHandler implements CommandRegistrationCallback {
                 .build(); // TODO
         var econGet = literal("get")
                 .build(); // TODO
-        var players = argument("players", EntityArgumentType.players())
-                .build();
+        var econGetPlayers = argument("players", EntityArgumentType.players())
+                .build(); // TODO
         var econAdd = literal("add")
                 .build(); // TODO
-        var playersPoints = argument("players", EntityArgumentType.players())
-                .build();
-        var points = argument("points", LongArgumentType.longArg())
-                .build();
+        var econAddPlayers = argument("players", EntityArgumentType.players())
+                .build(); // TODO
+        var econAddPlayersPoints = argument("points", LongArgumentType.longArg(1))
+                .build(); // TODO
         var econRemove = literal("remove")
+                .build(); // TODO
+        var econRemovePlayers = argument("players", EntityArgumentType.players())
+                .build(); // TODO
+        var econRemovePlayersPoints = argument("points", LongArgumentType.longArg(1))
                 .build(); // TODO
         var econTotal = literal("total")
                 .build(); // TODO
@@ -49,25 +54,29 @@ public class CommandHandler implements CommandRegistrationCallback {
                 .build();
         var withdraw = literal("withdraw")
                 .build(); // TODO
+        var withdrawPoints = argument("points", LongArgumentType.longArg(1))
+                .executes(this::withdraw)
+                .build();
         var withdrawAll = literal("all")
-                .build(); // TODO
+                .executes(this::withdrawAll)
+                .build();
 
-        // Linking, depth-first
+        // Building tree
         root.addChild(wbshop);
             wbshop.addChild(econ);
                 econ.addChild(econGet);
-                    econGet.addChild(players);
+                    econGet.addChild(econGetPlayers);
                 econ.addChild(econAdd);
-                    econAdd.addChild(playersPoints);
-                        playersPoints.addChild(points);
+                    econAdd.addChild(econAddPlayers);
+                        econAddPlayers.addChild(econAddPlayersPoints);
                 econ.addChild(econRemove);
-                    econRemove.addChild(playersPoints);
+                    econRemove.addChild(econRemovePlayers);
+                        econRemovePlayers.addChild(econRemovePlayersPoints);
                 econ.addChild(econTotal);
-            // TODO: Admin commands
         root.addChild(bal);
         root.addChild(donate);
         root.addChild(withdraw);
-            withdraw.addChild(points);
+            withdraw.addChild(withdrawPoints);
             withdraw.addChild(withdrawAll);
 
     }
@@ -88,6 +97,41 @@ public class CommandHandler implements CommandRegistrationCallback {
         }
         context.getSource().sendError(Text.of("This command must be run by a player."));
         return 0;
+    }
+
+    private int withdraw(CommandContext<ServerCommandSource> context) {
+        ServerPlayerEntity player = context.getSource().getPlayer();
+        if (player == null) {
+            context.getSource().sendError(Text.of("This command must be executed by a player!"));
+            return -1;
+        }
+        Account account = WBShop.getEconomy().getOrCreateAccount(player);
+
+        long points;
+        try {
+            points = LongArgumentType.getLong(context, "points");
+        } catch (IllegalArgumentException e) {
+            context.getSource().sendError(Text.of("You have to specify how many points you want to withdraw."));
+            return -2;
+        }
+
+        if (account.withdraw(points, player)) { // Intended side effect: Voucher is given to player if they have enough points.
+                return Command.SINGLE_SUCCESS;
+        } else {
+            context.getSource().sendError(Text.of("You don't have enough points!"));
+            return 0;
+        }
+    }
+
+    private int withdrawAll(CommandContext<ServerCommandSource> context) {
+        ServerPlayerEntity player = context.getSource().getPlayer();
+        if (player == null) {
+            context.getSource().sendError(Text.of("This command must be executed by a player!"));
+            return -1;
+        }
+        Account account = WBShop.getEconomy().getOrCreateAccount(player);
+
+        return account.withdraw(account.balance(), player) ? Command.SINGLE_SUCCESS : (0 /* Should not happen unless there's some weird desync */);
     }
 
 

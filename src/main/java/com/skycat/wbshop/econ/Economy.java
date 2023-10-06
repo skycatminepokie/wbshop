@@ -12,6 +12,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtLong;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -96,7 +97,17 @@ public class Economy extends PersistentState implements EconomyProvider {
     }
 
     public long pointValueOf(ItemStack stack) {
-        // TODO: Check nbt for points
+        if (stack.hasNbt()) {
+            NbtCompound nbt = stack.getNbt();
+            if (nbt == null) {
+                Utils.log("ItemStack had custom nbt, but the nbt was null. I don't think that should happen.");
+            } else {
+                NbtLong points = (NbtLong) nbt.get("wbpoints");
+                if (points != null) {
+                    return points.longValue() * stack.getCount();
+                }
+            }
+        }
         return stack.getCount() * pointValueOf(stack.getItem());
     }
 
