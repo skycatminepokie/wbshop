@@ -133,7 +133,6 @@ public class Account implements EconomyAccount {
         // TODO
         if (amount > balance) return false;
         ItemStack voucher = new ItemStack(Items.PAPER, 1);
-        voucher.setCustomName(Text.of("Point Voucher"));
 
         NbtCompound nbt = new NbtCompound();
         // NbtString#of apparently needs the JSON format of a Text in the form of a string
@@ -144,6 +143,8 @@ public class Account implements EconomyAccount {
         lore.add(NbtString.of(Text.Serializer.toJson(Text.of(amount + " point" + (amount == 1 ? "": "s")))));
 
         voucher.getOrCreateSubNbt("display").put("Lore", lore);
+
+        voucher.setCustomName(Text.of("Point Voucher"));
 
         player.getInventory().offerOrDrop(voucher);
         removeBalance(amount);
