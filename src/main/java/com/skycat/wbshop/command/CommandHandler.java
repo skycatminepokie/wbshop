@@ -36,6 +36,7 @@ public class CommandHandler implements CommandRegistrationCallback {
         var econGet = literal("get")
                 .build(); // TODO
         var econGetPlayers = argument("players", EntityArgumentType.players())
+                .executes(this::econGet)
                 .build(); // TODO
         var econAdd = literal("add")
                 .build(); // TODO
@@ -49,6 +50,7 @@ public class CommandHandler implements CommandRegistrationCallback {
         var econRemovePlayers = argument("players", EntityArgumentType.players())
                 .build(); // TODO
         var econRemovePlayersPoints = argument("points", LongArgumentType.longArg(1))
+                .executes(this::econRemove)
                 .build(); // TODO
         var econTotal = literal("total")
                 .build(); // TODO
@@ -87,6 +89,26 @@ public class CommandHandler implements CommandRegistrationCallback {
             withdraw.addChild(withdrawPoints);
             withdraw.addChild(withdrawAll);
 
+    }
+
+    private int econGet(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "players");
+        for (ServerPlayerEntity player : players) {
+            long bal = WBShop.getEconomy().getOrCreateAccount(player).balance();
+            context.getSource().sendFeedback(() -> player.getName().copy().append(" has " + bal + " points."), false);
+        }
+        return players.size();
+
+    }
+
+    private int econRemove(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        long points = LongArgumentType.getLong(context, "points");
+        Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "players");
+        for (ServerPlayerEntity player : players) {
+            WBShop.getEconomy().getOrCreateAccount(player).removeBalance(points);
+            context.getSource().sendFeedback(() -> Text.literal("Removed " + points + " points from ").append(player.getName()), false);
+        }
+        return players.size();
     }
 
     private int donate(CommandContext<ServerCommandSource> context) {
