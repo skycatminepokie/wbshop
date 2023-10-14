@@ -5,16 +5,21 @@ import com.skycat.wbshop.econ.Economy;
 import com.skycat.wbshop.util.Utils;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.function.Function;
 
-public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWorldEvents.Unload {
+public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWorldEvents.Unload, ServerLivingEntityEvents.AfterDeath {
     public static final String MOD_ID = "wbshop";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static @Nullable MinecraftServer server = null;
@@ -45,9 +50,22 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
     }
 
     @Override
+    public void afterDeath(LivingEntity entity, DamageSource damageSource) {
+        if (entity instanceof ServerPlayerEntity player) {
+            if (economy != null) {
+                var account = economy.getOrCreateAccount(player);
+                long pointsLost = (long) Math.ceil(account.balance() * 0.1);
+                account.removeBalance(pointsLost);
+                player.sendMessage(Text.of("You died and lost " + pointsLost + " points.")); // TODO: Plurality
+            }
+        }
+    }
+
+    @Override
     public void onInitialize() {
         ServerWorldEvents.LOAD.register(this);
         CommandRegistrationCallback.EVENT.register(COMMAND_HANDLER);
+        ServerLivingEntityEvents.AFTER_DEATH.register(this);
         // CommonEconomy.register(EconomyProvider) // Hmm. How is this gonna work?
     }
 
