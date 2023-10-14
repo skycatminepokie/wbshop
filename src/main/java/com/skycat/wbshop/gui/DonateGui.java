@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DonateGui extends SimpleGui { // Slight problem: When force closed (portal, maybe death) items are not donated
+public class DonateGui extends SimpleGui { // Slight problem: When force closed (portal, maybe death) items are taken but not donated
     public GuiElement currentBalanceIcon;
     public GuiElement donationWorthIcon;
     public GuiElement itemsDonatedIcon;

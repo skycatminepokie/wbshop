@@ -38,7 +38,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
 
     public static void updateBorder() {
         if (getServer() != null && getEconomy() != null && getServer().getOverworld() != null) {
-            getServer().getOverworld().getWorldBorder().setSize(Math.max(borderFunction.apply(economy.getTotalPoints()), 5));
+            getServer().getOverworld().getWorldBorder().setSize(Math.max(Math.ceil(borderFunction.apply(economy.getTotalPoints())), 5));
         } else {
             Utils.log("Attempted to update border while something was null - this shouldn't happen. Hopefully nothing goes wrong, but please report this.");
         }
@@ -48,6 +48,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
     public void onInitialize() {
         ServerWorldEvents.LOAD.register(this);
         CommandRegistrationCallback.EVENT.register(COMMAND_HANDLER);
+        // CommonEconomy.register(EconomyProvider) // Hmm. How is this gonna work?
     }
 
     @Override
