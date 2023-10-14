@@ -45,6 +45,8 @@ jobs:
       - name: Publish
         uses: Kir-Antipov/mc-publish@v3.3
         with:
+          version-type: alpha
+
           modrinth-id: 1V7z9dq4
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
