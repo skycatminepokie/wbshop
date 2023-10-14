@@ -1,6 +1,7 @@
 package com.skycat.wbshop;
 
 import com.skycat.wbshop.command.CommandHandler;
+import com.skycat.wbshop.econ.Account;
 import com.skycat.wbshop.econ.Economy;
 import com.skycat.wbshop.util.Utils;
 import net.fabricmc.api.ModInitializer;
@@ -52,8 +53,9 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
     @Override
     public void afterDeath(LivingEntity entity, DamageSource damageSource) {
         if (entity instanceof ServerPlayerEntity player) {
-            if (economy != null) {
-                var account = economy.getOrCreateAccount(player);
+            Economy econ = getEconomy();
+            if (econ != null) {
+                Account account = econ.getOrCreateAccount(player);
                 long pointsLost = (long) Math.ceil(account.balance() * 0.1);
                 account.removeBalance(pointsLost);
                 player.sendMessage(Text.of("You died and lost " + pointsLost + " points.")); // TODO: Plurality
