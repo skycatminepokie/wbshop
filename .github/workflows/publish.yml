@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   build:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' # ty process-analytics/github-actions-playground
     runs-on: ubuntu-latest
     steps:
       - name: Check Environment Variables
