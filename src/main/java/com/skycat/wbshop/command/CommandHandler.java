@@ -29,7 +29,7 @@ public class CommandHandler implements CommandRegistrationCallback {
         // Sorted code in a depth-first thing for the tree
         var root = dispatcher.getRoot();
         var wbshop = literal("wbshop")
-                .build(); // TODO
+                .build(); // TODO: Gui
         var econ = literal("econ")
                 .requires(Permissions.require("wbshop.econ", 4))
                 .build(); // TODO
