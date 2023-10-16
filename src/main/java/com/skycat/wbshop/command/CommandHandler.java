@@ -1,5 +1,6 @@
 package com.skycat.wbshop.command;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.LongArgumentType;
@@ -8,10 +9,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.skycat.wbshop.WBShop;
 import com.skycat.wbshop.econ.Account;
 import com.skycat.wbshop.gui.DonateGui;
+import com.skycat.wbshop.gui.OverviewGui;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -29,25 +31,26 @@ public class CommandHandler implements CommandRegistrationCallback {
         // Sorted code in a depth-first thing for the tree
         var root = dispatcher.getRoot();
         var wbshop = literal("wbshop")
+                .executes(this::wbshop)
                 .build(); // TODO: Gui
         var econ = literal("econ")
                 .requires(Permissions.require("wbshop.econ", 4))
                 .build(); // TODO
         var econGet = literal("get")
                 .build(); // TODO
-        var econGetPlayers = argument("players", EntityArgumentType.players())
+        var econGetPlayers = argument("players", GameProfileArgumentType.gameProfile())
                 .executes(this::econGet)
                 .build(); // TODO
         var econAdd = literal("add")
                 .build(); // TODO
-        var econAddPlayers = argument("players", EntityArgumentType.players())
+        var econAddPlayers = argument("players", GameProfileArgumentType.gameProfile())
                 .build(); // TODO
         var econAddPlayersPoints = argument("points", LongArgumentType.longArg(1))
                 .executes(this::econAdd)
                 .build();
         var econRemove = literal("remove")
                 .build(); // TODO
-        var econRemovePlayers = argument("players", EntityArgumentType.players())
+        var econRemovePlayers = argument("players", GameProfileArgumentType.gameProfile())
                 .build(); // TODO
         var econRemovePlayersPoints = argument("points", LongArgumentType.longArg(1))
                 .executes(this::econRemove)
@@ -91,11 +94,20 @@ public class CommandHandler implements CommandRegistrationCallback {
 
     }
 
+    private int wbshop(CommandContext<ServerCommandSource> context) {
+        if (context.getSource().getEntity() instanceof ServerPlayerEntity player) {
+            new OverviewGui(player).open();
+            return Command.SINGLE_SUCCESS;
+        }
+        context.getSource().sendError(Text.of("This command must be executed by a player!"));
+        return 0;
+    }
+
     private int econGet(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "players");
-        for (ServerPlayerEntity player : players) {
+        Collection<GameProfile> players = GameProfileArgumentType.getProfileArgument(context, "players");
+        for (GameProfile player : players) {
             long bal = WBShop.getEconomy().getOrCreateAccount(player).balance();
-            context.getSource().sendFeedback(() -> player.getName().copy().append(" has " + bal + " points."), false);
+            context.getSource().sendFeedback(() -> Text.of(player.getName() + " has " + bal + " points."), false);
         }
         return players.size();
 
@@ -103,8 +115,8 @@ public class CommandHandler implements CommandRegistrationCallback {
 
     private int econRemove(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         long points = LongArgumentType.getLong(context, "points");
-        Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "players");
-        for (ServerPlayerEntity player : players) {
+        Collection<GameProfile> players = GameProfileArgumentType.getProfileArgument(context, "players");
+        for (GameProfile player : players) {
             WBShop.getEconomy().getOrCreateAccount(player).removeBalance(points);
             context.getSource().sendFeedback(() -> Text.literal("Removed " + points + " points from ").append(player.getName()), false);
         }
@@ -166,8 +178,8 @@ public class CommandHandler implements CommandRegistrationCallback {
 
     private int econAdd(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         long points = LongArgumentType.getLong(context, "points");
-        Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "players");
-        for (ServerPlayerEntity player : players) {
+        Collection<GameProfile> players = GameProfileArgumentType.getProfileArgument(context, "players");
+        for (GameProfile player : players) {
             WBShop.getEconomy().getOrCreateAccount(player).addBalance(points);
             context.getSource().sendFeedback(() -> Text.literal("Gave " + points + " points to ").append(player.getName()), false);
         }
