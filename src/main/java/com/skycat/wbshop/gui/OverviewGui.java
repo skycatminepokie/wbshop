@@ -19,19 +19,20 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.UserCache;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 public class OverviewGui extends LayeredGui {
     private final ServerPlayerEntity player;
     GuiElement adminButton; // TODO
     GuiElement myAccountIcon;
     GuiElement borderInformationIcon;
-    GuiElement prevButton;
-    GuiElement nextButton;
+    GuiElement prevButton; // TODO
+    GuiElement nextButton; // TODO
     List<Account> playerList;
 
     /**
@@ -51,11 +52,15 @@ public class OverviewGui extends LayeredGui {
         }
         Account account = econ.getOrCreateAccount(player);
         addLayer(initMenuBarLayer(server, account, econ), 0, 0);
-        var topPlayerLayer = initTopPlayerLayer(server, econ);
+        ListLayer topPlayerLayer = initTopPlayerLayer(server, econ);
         addLayer(topPlayerLayer, 1, 2);
+        prevButton = topPlayerLayer.prevButtonBuilder().build();
+        setSlot(27, prevButton);
+        nextButton = topPlayerLayer.nextButtonBuilder().build();
+        setSlot(35, nextButton);
     }
 
-    private Layer initTopPlayerLayer(MinecraftServer server, Economy econ) {
+    private ListLayer initTopPlayerLayer(MinecraftServer server, Economy econ) {
         playerList = econ.getAccountList();
         playerList.sort(Comparator.comparingLong(Account::balance));
 
@@ -71,7 +76,7 @@ public class OverviewGui extends LayeredGui {
 
 
         myAccountIcon = new GuiElementBuilder(Items.PLAYER_HEAD)
-                .setCallback(this::onClickMyAccountButton)
+                // TODO .setCallback(this::onClickMyAccountButton)
                 .setSkullOwner(player.getGameProfile(), server)
                 .setName(player.getName().copy().setStyle(Style.EMPTY.withColor(Formatting.AQUA)).append("'s account"))
                 .addLoreLine(Text.of("Balance: " + account.balance()))
@@ -94,11 +99,19 @@ public class OverviewGui extends LayeredGui {
      * @param account The account of the player to create an icon for
      * @return A new icon.
      */
-    public GuiElement createTopPlayerIcon(Account account, @Nullable MinecraftServer server) {
-        var player = new GameProfile(account.owner(), null);
+    public GuiElement createTopPlayerIcon(Account account, MinecraftServer server) {
+        GameProfile profile;
+        UserCache userCache = server.getUserCache();
+        if (userCache != null) {
+            Optional<GameProfile> optProfile = userCache.getByUuid(account.owner());
+            profile = optProfile.orElse(new GameProfile(account.owner(), null));
+        } else {
+            profile = new GameProfile(account.owner(), null); // This is repeating code but it looks best to me
+        }
+
         return new GuiElementBuilder(Items.PLAYER_HEAD)
-                .setSkullOwner(player, server)
-                .setName(Text.of(player.getName()))
+                .setSkullOwner(profile, server)
+                .setName(Text.of(profile.getName()))
                 .addLoreLine(Text.of("Points: " + account.balance()))
                 .build();
     }
