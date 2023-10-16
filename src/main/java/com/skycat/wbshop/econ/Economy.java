@@ -20,10 +20,7 @@ import net.minecraft.text.Text;
 import net.minecraft.world.PersistentState;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents and handles the points economy.
@@ -71,11 +68,11 @@ public class Economy extends PersistentState implements EconomyProvider {
 
     /**
      * Get a list of all accounts.
-     * Utility method for serialization.
+     * For read-only access.
      * @return A new list containing all accounts.
      */
-    private List<Account> getAccountList() {
-        return accounts.values().stream().toList();
+    public ArrayList<Account> getAccountList() {
+        return new ArrayList<>(accounts.values());
     }
 
     public long getTotalPoints() {
