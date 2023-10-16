@@ -1,0 +1,110 @@
+package com.skycat.wbshop.gui;
+
+import com.mojang.authlib.GameProfile;
+import com.skycat.wbshop.WBShop;
+import com.skycat.wbshop.econ.Account;
+import com.skycat.wbshop.econ.Economy;
+import com.skycat.wbshop.util.Utils;
+import eu.pb4.sgui.api.ClickType;
+import eu.pb4.sgui.api.elements.GuiElement;
+import eu.pb4.sgui.api.elements.GuiElementBuilder;
+import eu.pb4.sgui.api.gui.SlotGuiInterface;
+import eu.pb4.sgui.api.gui.layered.Layer;
+import eu.pb4.sgui.api.gui.layered.LayeredGui;
+import net.minecraft.item.Items;
+import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+public class OverviewGui extends LayeredGui {
+    private final ServerPlayerEntity player;
+    GuiElement adminButton; // TODO
+    GuiElement myAccountIcon;
+    GuiElement borderInformationIcon;
+    GuiElement prevButton;
+    GuiElement nextButton;
+    List<Account> playerList;
+
+    /**
+     * Constructs a new simple container gui for the supplied player.
+     *
+     * @param player the player to server this gui to
+     */
+    public OverviewGui(ServerPlayerEntity player) {
+        super(ScreenHandlerType.GENERIC_9X6, player, false);
+        this.player = player;
+        MinecraftServer server = player.getServer();
+        Economy econ = WBShop.getEconomy();
+        if (server == null || econ == null) {
+            Utils.log("Unable to open overview gui, server or economy is null.");
+            backgroundLayer.setSlot(backgroundLayer.getSize() / 2, new GuiElementBuilder(Items.BARRIER).setName(Text.of("Unable to open overview gui, server or economy is null.")));
+            return;
+        }
+        Account account = econ.getOrCreateAccount(player);
+        addLayer(initMenuBarLayer(server, account, econ), 0, 0);
+        var topPlayerLayer = initTopPlayerLayer(server, econ);
+        addLayer(topPlayerLayer, 1, 2);
+    }
+
+    private Layer initTopPlayerLayer(MinecraftServer server, Economy econ) {
+        playerList = econ.getAccountList();
+        playerList.sort(Comparator.comparingLong(Account::balance));
+
+        ArrayList<GuiElement> playerIconList = new ArrayList<>(playerList.size());
+        for (Account account : playerList) {
+            playerIconList.add(createTopPlayerIcon(account, server));
+        }
+        return new ListLayer(3, 7, playerIconList);
+    }
+
+    private Layer initMenuBarLayer(MinecraftServer server, Account account, Economy econ) {
+        Layer menuBar = new Layer(1, 9);
+
+
+        myAccountIcon = new GuiElementBuilder(Items.PLAYER_HEAD)
+                .setCallback(this::onClickMyAccountButton)
+                .setSkullOwner(player.getGameProfile(), server)
+                .setName(player.getName().copy().setStyle(Style.EMPTY.withColor(Formatting.AQUA)).append("'s account"))
+                .addLoreLine(Text.of("Balance: " + account.balance()))
+                .addLoreLine(Text.of("Total items donated: " + account.getTotalItemsDonated()))
+                .build();
+        menuBar.setSlot(4, myAccountIcon);
+
+        borderInformationIcon = new GuiElementBuilder(Items.FILLED_MAP)
+                .setName(Text.of("Border size: " + ((int) player.getWorld().getWorldBorder().getSize())))
+                .addLoreLine(Text.of("World's total points: " + econ.getTotalPoints()))
+                // TODO: Add algorithm to lore
+                .build();
+        menuBar.setSlot(8, borderInformationIcon);
+        return menuBar;
+    }
+
+    /**
+     * Creates an icon showing a player and their account balance.
+     *
+     * @param account The account of the player to create an icon for
+     * @return A new icon.
+     */
+    public GuiElement createTopPlayerIcon(Account account, @Nullable MinecraftServer server) {
+        var player = new GameProfile(account.owner(), null);
+        return new GuiElementBuilder(Items.PLAYER_HEAD)
+                .setSkullOwner(player, server)
+                .setName(Text.of(player.getName()))
+                .addLoreLine(Text.of("Points: " + account.balance()))
+                .build();
+    }
+
+    public void onClickMyAccountButton(int index, ClickType clickType, SlotActionType actionType, SlotGuiInterface gui) {
+        gui.close();
+        new AccountGui(player, false).open(); // TODO: open in admin mode if right click and has perms
+    }
+}

@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.skycat.wbshop.WBShop;
 import com.skycat.wbshop.econ.Account;
 import com.skycat.wbshop.gui.DonateGui;
+import com.skycat.wbshop.gui.OverviewGui;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
@@ -30,6 +31,7 @@ public class CommandHandler implements CommandRegistrationCallback {
         // Sorted code in a depth-first thing for the tree
         var root = dispatcher.getRoot();
         var wbshop = literal("wbshop")
+                .executes(this::wbshop)
                 .build(); // TODO: Gui
         var econ = literal("econ")
                 .requires(Permissions.require("wbshop.econ", 4))
@@ -90,6 +92,15 @@ public class CommandHandler implements CommandRegistrationCallback {
             withdraw.addChild(withdrawPoints);
             withdraw.addChild(withdrawAll);
 
+    }
+
+    private int wbshop(CommandContext<ServerCommandSource> context) {
+        if (context.getSource().getEntity() instanceof ServerPlayerEntity player) {
+            new OverviewGui(player).open();
+            return Command.SINGLE_SUCCESS;
+        }
+        context.getSource().sendError(Text.of("This command must be executed by a player!"));
+        return 0;
     }
 
     private int econGet(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
