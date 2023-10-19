@@ -11,15 +11,14 @@ import eu.pb4.common.economy.api.EconomyProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtLong;
-import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.world.PersistentState;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -152,6 +151,24 @@ public class Economy extends PersistentState implements EconomyProvider {
             return CURRENCY;
         }
         return null;
+    }
+
+    @NotNull
+    public static ItemStack makeVoucher(long amount) {
+        ItemStack voucher = new ItemStack(Items.PAPER, 1);
+
+        NbtCompound nbt = new NbtCompound();
+        // NbtString#of apparently needs the JSON format of a Text in the form of a string
+        nbt.put("wbpoints", NbtLong.of(amount));
+        voucher.setNbt(nbt);
+
+        NbtList lore = new NbtList();
+        lore.add(NbtString.of(Text.Serializer.toJson(Text.of(amount + " point" + (amount == 1 ? "": "s")))));
+
+        voucher.getOrCreateSubNbt("display").put("Lore", lore);
+
+        voucher.setCustomName(Text.of("Point Voucher"));
+        return voucher;
     }
 
     public Account getOrCreateAccount(UUID uuid) {

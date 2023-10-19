@@ -12,10 +12,6 @@ import eu.pb4.common.economy.api.EconomyTransaction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtLong;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -132,19 +128,7 @@ public class Account implements EconomyAccount {
      */
     public boolean withdraw(long amount, ServerPlayerEntity player) {
         if (amount > balance) return false;
-        ItemStack voucher = new ItemStack(Items.PAPER, 1);
-
-        NbtCompound nbt = new NbtCompound();
-        // NbtString#of apparently needs the JSON format of a Text in the form of a string
-        nbt.put("wbpoints", NbtLong.of(amount));
-        voucher.setNbt(nbt);
-
-        NbtList lore = new NbtList();
-        lore.add(NbtString.of(Text.Serializer.toJson(Text.of(amount + " point" + (amount == 1 ? "": "s")))));
-
-        voucher.getOrCreateSubNbt("display").put("Lore", lore);
-
-        voucher.setCustomName(Text.of("Point Voucher"));
+        ItemStack voucher = Economy.makeVoucher(amount);
 
         player.getInventory().offerOrDrop(voucher);
         removeBalance(amount);
