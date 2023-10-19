@@ -1,1 +1,1 @@
-- Allow managing offline players
+- Fix leaderboard being backward

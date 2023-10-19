@@ -62,7 +62,7 @@ public class OverviewGui extends LayeredGui {
 
     private ListLayer initTopPlayerLayer(MinecraftServer server, Economy econ) {
         playerList = econ.getAccountList();
-        playerList.sort(Comparator.comparingLong(Account::balance));
+        playerList.sort(Comparator.comparingLong(Account::balance).reversed());
 
         ArrayList<GuiElement> playerIconList = new ArrayList<>(playerList.size());
         for (Account account : playerList) {
