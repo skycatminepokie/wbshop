@@ -1,4 +1,6 @@
 # Worldborder Shop
 Fight the world border for every block
-### A rewrite is in progress...
-Until then, enjoy the [old version](https://github.com/skycatminepokie/wbshop-mod)!
+
+### Probably important legal info
+wbshop is licensed under the MIT license.
+exp4j is embedded, which is license under Apache License 2.0. No modifications were made.
