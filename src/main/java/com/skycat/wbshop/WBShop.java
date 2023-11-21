@@ -41,7 +41,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
 
     public static void updateBorder() {
         if (getServer() != null && getEconomy() != null && getServer().getOverworld() != null) {
-            getServer().getOverworld().getWorldBorder().setSize(Math.max(Math.ceil(getEconomy().getBorderFunction().apply(economy.getTotalPoints())), 5));
+            getServer().getOverworld().getWorldBorder().setSize(getEconomy().evaluateBorderSize(economy.getTotalPoints()));
         } else {
             Utils.log("Attempted to update border while something was null - this shouldn't happen. Hopefully nothing goes wrong, but please report this.");
         }
