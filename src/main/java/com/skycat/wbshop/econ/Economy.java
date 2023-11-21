@@ -8,6 +8,7 @@ import com.skycat.wbshop.util.Utils;
 import eu.pb4.common.economy.api.EconomyAccount;
 import eu.pb4.common.economy.api.EconomyCurrency;
 import eu.pb4.common.economy.api.EconomyProvider;
+import lombok.Getter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -21,6 +22,7 @@ import net.minecraft.world.PersistentState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Represents and handles the points economy.
@@ -37,6 +39,7 @@ public class Economy extends PersistentState implements EconomyProvider {
             Codec.INT.fieldOf("configVersion").forGetter(Economy::getConfigVersion),
             Account.CODEC.listOf().fieldOf("accounts").forGetter(Economy::getAccountList)
     ).apply(economy, Economy::new));
+    @Getter private Function<Long, Double> borderFunction = Math::sqrt;
     private final HashMap<UUID, Account> accounts = new HashMap<>(); // Keep it in a HashMap for fast lookup.
     private int configVersion = 0;
 

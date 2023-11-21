@@ -18,15 +18,12 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.Function;
-
 public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWorldEvents.Unload, ServerLivingEntityEvents.AfterDeath {
     public static final String MOD_ID = "wbshop";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static @Nullable MinecraftServer server = null;
     private static Economy economy = null;
     private static final CommandHandler COMMAND_HANDLER = new CommandHandler();
-    public static Function<Long, Double> borderFunction = Math::sqrt;
 
     /**
      * Null when world is remote or not loaded.
@@ -44,7 +41,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
 
     public static void updateBorder() {
         if (getServer() != null && getEconomy() != null && getServer().getOverworld() != null) {
-            getServer().getOverworld().getWorldBorder().setSize(Math.max(Math.ceil(borderFunction.apply(economy.getTotalPoints())), 5));
+            getServer().getOverworld().getWorldBorder().setSize(Math.max(Math.ceil(getEconomy().getBorderFunction().apply(economy.getTotalPoints())), 5));
         } else {
             Utils.log("Attempted to update border while something was null - this shouldn't happen. Hopefully nothing goes wrong, but please report this.");
         }
