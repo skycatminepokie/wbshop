@@ -1,1 +1,2 @@
 - Added exp4j for custom border algorithms
+- Added `/wbshop econ borderFunction <function>` for setting the function that determines the width of the border

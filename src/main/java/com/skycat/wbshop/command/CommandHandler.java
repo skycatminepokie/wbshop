@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.LongArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.skycat.wbshop.WBShop;
@@ -57,6 +58,11 @@ public class CommandHandler implements CommandRegistrationCallback {
                 .build(); // TODO
         var econTotal = literal("total")
                 .build(); // TODO
+        var econBorderFunction = literal("borderFunction")
+                .build(); // TODO: Help text
+        var econBorderFunctionFunction = argument("function", StringArgumentType.string())
+                .executes(this::setBorderFunction)
+                .build();
         var bal = literal("bal")
                 .executes(this::bal)
                 .build();
@@ -86,12 +92,24 @@ public class CommandHandler implements CommandRegistrationCallback {
                     econRemove.addChild(econRemovePlayers);
                         econRemovePlayers.addChild(econRemovePlayersPoints);
                 econ.addChild(econTotal);
+                econ.addChild(econBorderFunction);
+                    econBorderFunction.addChild(econBorderFunctionFunction);
         root.addChild(bal);
         root.addChild(donate);
         root.addChild(withdraw);
             withdraw.addChild(withdrawPoints);
             withdraw.addChild(withdrawAll);
 
+    }
+
+    private int setBorderFunction(CommandContext<ServerCommandSource> context) {
+        String functionString = StringArgumentType.getString(context, "function");
+        if (WBShop.getEconomy().setBorderFunction(functionString)) {
+            context.getSource().sendFeedback(() -> Text.of("Successfully updated border function!"), true);
+            return Command.SINGLE_SUCCESS;
+        }
+        context.getSource().sendError(Text.of("Failed to update border function."));
+        return -1;
     }
 
     private int wbshop(CommandContext<ServerCommandSource> context) {

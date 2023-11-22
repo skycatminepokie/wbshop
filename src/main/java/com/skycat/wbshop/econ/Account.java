@@ -3,6 +3,7 @@ package com.skycat.wbshop.econ;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycat.wbshop.WBShop;
+import com.skycat.wbshop.util.LogLevel;
 import com.skycat.wbshop.util.Utils;
 import eu.pb4.common.economy.api.EconomyAccount;
 import eu.pb4.common.economy.api.EconomyCurrency;
@@ -171,7 +172,7 @@ public class Account implements EconomyAccount {
         if (value >= 0) {
             balance = value;
         } else {
-            WBShop.LOGGER.error("Something tried to set the value of account " + id() + " to " + value + ". Negatives are not allowed, defaulting to 0.");
+            Utils.log("Something tried to set the value of account " + id() + " to " + value + ". Negatives are not allowed, defaulting to 0.", LogLevel.WARN);
             balance = 0;
         }
         WBShop.getEconomy().markDirty();

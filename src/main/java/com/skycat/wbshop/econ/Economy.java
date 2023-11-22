@@ -55,11 +55,13 @@ public class Economy extends PersistentState implements EconomyProvider {
      * @return True if the function is valid, false if the function is not valid.
      */
     public boolean setBorderFunction(String newExpression) {
-        Expression newFunction = new ExpressionBuilder("newExpression").variable("points").build();
+        Expression newFunction = new ExpressionBuilder(newExpression).variable("points").build();
+        newFunction.setVariable("points", getTotalPoints());
         if (newFunction.validate().isValid()) {
             borderFunction = newFunction;
             borderExpressionString = newExpression;
             markDirty();
+            WBShop.updateBorder();
             return true;
         }
         return false;
