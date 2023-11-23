@@ -65,6 +65,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
         ServerWorldEvents.LOAD.register(this);
         CommandRegistrationCallback.EVENT.register(COMMAND_HANDLER);
         ServerLivingEntityEvents.AFTER_DEATH.register(this);
+        updateBorder();
         // CommonEconomy.register(EconomyProvider) // Hmm. How is this gonna work?
     }
 
