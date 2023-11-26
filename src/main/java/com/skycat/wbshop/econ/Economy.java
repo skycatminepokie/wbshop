@@ -37,11 +37,17 @@ public class Economy extends PersistentState implements EconomyProvider {
     public static final Points CURRENCY = new Points();
     public static final Codec<Economy> CODEC = RecordCodecBuilder.create(economy -> economy.group(
             Codec.INT.fieldOf("configVersion").forGetter(Economy::getConfigVersion),
-            Account.CODEC.listOf().fieldOf("accounts").forGetter(Economy::getAccountList)
+            Account.CODEC.listOf().fieldOf("accounts").forGetter(Economy::getAccountList),
+            Codec.STRING.optionalFieldOf("borderFunctionString", "sqrt(points)").forGetter(Economy::getBorderFunctionString)
     ).apply(economy, Economy::new));
     private final HashMap<UUID, Account> accounts = new HashMap<>(); // Keep it in a HashMap for fast lookup.
-    private String borderExpressionString = "sqrt(points)";
-    private Expression borderFunction = new ExpressionBuilder(borderExpressionString)
+
+    public String getBorderFunctionString() {
+        return borderFunctionString;
+    }
+
+    private String borderFunctionString = "sqrt(points)";
+    private Expression borderFunction = new ExpressionBuilder(borderFunctionString)
             .variable("points")
             .build();
     private int configVersion = 0;
@@ -59,7 +65,7 @@ public class Economy extends PersistentState implements EconomyProvider {
         newFunction.setVariable("points", getTotalPoints());
         if (newFunction.validate().isValid()) {
             borderFunction = newFunction;
-            borderExpressionString = newExpression;
+            borderFunctionString = newExpression;
             markDirty();
             WBShop.updateBorder();
             return true;
@@ -67,11 +73,12 @@ public class Economy extends PersistentState implements EconomyProvider {
         return false;
     }
 
-    private Economy(int configVersion, List<Account> accountList) {
+    private Economy(int configVersion, List<Account> accountList, String borderFunctionString) {
         this.configVersion = configVersion;
         for (Account account : accountList) {
             accounts.put(account.owner(), account);
         }
+        this.borderFunctionString = borderFunctionString;
     }
 
     //<editor-fold desc="Serialization">
