@@ -33,29 +33,29 @@ public class CommandHandler implements CommandRegistrationCallback {
         var root = dispatcher.getRoot();
         var wbshop = literal("wbshop")
                 .executes(this::wbshop)
-                .build(); // TODO: Gui
+                .build();
         var econ = literal("econ")
                 .requires(Permissions.require("wbshop.econ", 4))
-                .build(); // TODO
+                .build();
         var econGet = literal("get")
-                .build(); // TODO
+                .build();
         var econGetPlayers = argument("players", GameProfileArgumentType.gameProfile())
                 .executes(this::econGet)
-                .build(); // TODO
+                .build();
         var econAdd = literal("add")
-                .build(); // TODO
+                .build();
         var econAddPlayers = argument("players", GameProfileArgumentType.gameProfile())
-                .build(); // TODO
+                .build();
         var econAddPlayersPoints = argument("points", LongArgumentType.longArg(1))
                 .executes(this::econAdd)
                 .build();
         var econRemove = literal("remove")
-                .build(); // TODO
+                .build();
         var econRemovePlayers = argument("players", GameProfileArgumentType.gameProfile())
-                .build(); // TODO
+                .build();
         var econRemovePlayersPoints = argument("points", LongArgumentType.longArg(1))
                 .executes(this::econRemove)
-                .build(); // TODO
+                .build();
         var econTotal = literal("total")
                 .build(); // TODO
         var econBorderFunction = literal("borderFunction")
@@ -70,7 +70,7 @@ public class CommandHandler implements CommandRegistrationCallback {
                 .executes(this::donate)
                 .build();
         var withdraw = literal("withdraw")
-                .build(); // TODO
+                .build(); // TODO: Gui
         var withdrawPoints = argument("points", LongArgumentType.longArg(1))
                 .executes(this::withdraw)
                 .build();
