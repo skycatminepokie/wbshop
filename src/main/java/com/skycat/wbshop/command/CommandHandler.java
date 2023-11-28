@@ -106,7 +106,7 @@ public class CommandHandler implements CommandRegistrationCallback {
     private int econTotal(CommandContext<ServerCommandSource> context) {
         long total = WBShop.getEconomy().getTotalPoints();
         context.getSource().sendFeedback(()-> Text.of("There are a total of " + total + " points in player's accounts."), false); // TODO: Plurality
-        return Command.SINGLE_SUCCESS; // TODO: Make this scale with the number of points.
+        return Command.SINGLE_SUCCESS;
     }
 
     private int setBorderFunction(CommandContext<ServerCommandSource> context) {
