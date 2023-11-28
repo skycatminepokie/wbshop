@@ -71,7 +71,7 @@ public class CommandHandler implements CommandRegistrationCallback {
                 .executes(this::donate)
                 .build();
         var withdraw = literal("withdraw")
-                .build(); // TODO: Gui
+                .build();
         var withdrawPoints = argument("points", LongArgumentType.longArg(1))
                 .executes(this::withdraw)
                 .build();
