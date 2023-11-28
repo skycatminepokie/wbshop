@@ -57,7 +57,8 @@ public class CommandHandler implements CommandRegistrationCallback {
                 .executes(this::econRemove)
                 .build();
         var econTotal = literal("total")
-                .build(); // TODO
+                .executes(this::econTotal)
+                .build();
         var econBorderFunction = literal("borderFunction")
                 .build(); // TODO: Help text
         var econBorderFunctionFunction = argument("function", StringArgumentType.string())
@@ -100,6 +101,12 @@ public class CommandHandler implements CommandRegistrationCallback {
             withdraw.addChild(withdrawPoints);
             withdraw.addChild(withdrawAll);
 
+    }
+
+    private int econTotal(CommandContext<ServerCommandSource> context) {
+        long total = WBShop.getEconomy().getTotalPoints();
+        context.getSource().sendFeedback(()-> Text.of("There are a total of " + total + " points in player's accounts."), false); // TODO: Plurality
+        return Command.SINGLE_SUCCESS; // TODO: Make this scale with the number of points.
     }
 
     private int setBorderFunction(CommandContext<ServerCommandSource> context) {
