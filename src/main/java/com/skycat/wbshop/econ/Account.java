@@ -70,7 +70,7 @@ public class Account implements EconomyAccount {
         long value = WBShop.getEconomy().pointValueOf(stack);
         donatedItemCounts.put(stack.getItem(), current + stack.getCount());
         addBalance(value);
-        totalItemsDonated += stack.getCount(); // TODO: Better way - make a wrapper on hashmap
+        totalItemsDonated += stack.getCount();
         return value;
     }
 
