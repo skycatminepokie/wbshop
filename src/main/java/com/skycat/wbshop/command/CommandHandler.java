@@ -79,7 +79,7 @@ public class CommandHandler implements CommandRegistrationCallback {
                 .executes(this::withdrawAll)
                 .build();
         var pay = literal("pay")
-                .build(); // TODO
+                .build();
 
         // Building tree
         root.addChild(wbshop);
