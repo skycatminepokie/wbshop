@@ -60,7 +60,7 @@ public class CommandHandler implements CommandRegistrationCallback {
                 .executes(this::econTotal)
                 .build();
         var econBorderFunction = literal("borderFunction")
-                .build(); // TODO: Help text
+                .build();
         var econBorderFunctionFunction = argument("function", StringArgumentType.string())
                 .executes(this::setBorderFunction)
                 .build();
