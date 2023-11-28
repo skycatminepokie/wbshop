@@ -55,7 +55,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
                 Account account = econ.getOrCreateAccount(player);
                 long pointsLost = (long) Math.ceil(account.balance() * 0.1);
                 account.removeBalance(pointsLost);
-                player.sendMessage(Text.of("You died and lost " + pointsLost + " points.")); // TODO: Plurality
+                player.sendMessage(Text.of("You died and lost " + pointsLost + " points."));
             }
         }
     }
