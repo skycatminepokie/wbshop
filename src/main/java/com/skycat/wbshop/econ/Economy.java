@@ -190,7 +190,6 @@ public class Economy extends PersistentState implements EconomyProvider {
     //</editor-fold>
 
     public long getTotalPoints() {
-        // TODO: This is awfully inefficient, it needs to be cached. Especially considering how much it's called.
         long total = 0;
         for (Account account : accounts.values()) {
             total += account.balance();
