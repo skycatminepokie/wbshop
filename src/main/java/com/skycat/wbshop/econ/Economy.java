@@ -171,6 +171,24 @@ public class Economy extends PersistentState implements EconomyProvider {
         return voucher;
     }
 
+    @NotNull
+    public static ItemStack makeVoucher(long amount) {
+        ItemStack voucher = new ItemStack(Items.PAPER, 1);
+
+        NbtCompound nbt = new NbtCompound();
+        // NbtString#of apparently needs the JSON format of a Text in the form of a string
+        nbt.put("wbpoints", NbtLong.of(amount));
+        voucher.setNbt(nbt);
+
+        NbtList lore = new NbtList();
+        lore.add(NbtString.of(Text.Serializer.toJson(Text.of(amount + " point" + (amount == 1 ? "": "s")))));
+
+        voucher.getOrCreateSubNbt("display").put("Lore", lore);
+
+        voucher.setCustomName(Text.of("Point Voucher"));
+        return voucher;
+    }
+
     public Account getOrCreateAccount(UUID uuid) {
         if (accounts.containsKey(uuid)) {
             return accounts.get(uuid);
