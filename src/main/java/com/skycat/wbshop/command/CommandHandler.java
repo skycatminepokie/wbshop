@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.LongArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.skycat.wbshop.WBShop;
@@ -32,31 +33,37 @@ public class CommandHandler implements CommandRegistrationCallback {
         var root = dispatcher.getRoot();
         var wbshop = literal("wbshop")
                 .executes(this::wbshop)
-                .build(); // TODO: Gui
+                .build();
         var econ = literal("econ")
                 .requires(Permissions.require("wbshop.econ", 4))
-                .build(); // TODO
+                .build();
         var econGet = literal("get")
-                .build(); // TODO
+                .build();
         var econGetPlayers = argument("players", GameProfileArgumentType.gameProfile())
                 .executes(this::econGet)
-                .build(); // TODO
+                .build();
         var econAdd = literal("add")
-                .build(); // TODO
+                .build();
         var econAddPlayers = argument("players", GameProfileArgumentType.gameProfile())
-                .build(); // TODO
+                .build();
         var econAddPlayersPoints = argument("points", LongArgumentType.longArg(1))
                 .executes(this::econAdd)
                 .build();
         var econRemove = literal("remove")
-                .build(); // TODO
+                .build();
         var econRemovePlayers = argument("players", GameProfileArgumentType.gameProfile())
-                .build(); // TODO
+                .build();
         var econRemovePlayersPoints = argument("points", LongArgumentType.longArg(1))
                 .executes(this::econRemove)
-                .build(); // TODO
+                .build();
         var econTotal = literal("total")
-                .build(); // TODO
+                .executes(this::econTotal)
+                .build();
+        var econBorderFunction = literal("borderFunction")
+                .build();
+        var econBorderFunctionFunction = argument("function", StringArgumentType.string())
+                .executes(this::setBorderFunction)
+                .build();
         var bal = literal("bal")
                 .executes(this::bal)
                 .build();
@@ -64,7 +71,7 @@ public class CommandHandler implements CommandRegistrationCallback {
                 .executes(this::donate)
                 .build();
         var withdraw = literal("withdraw")
-                .build(); // TODO
+                .build();
         var withdrawPoints = argument("points", LongArgumentType.longArg(1))
                 .executes(this::withdraw)
                 .build();
@@ -72,7 +79,7 @@ public class CommandHandler implements CommandRegistrationCallback {
                 .executes(this::withdrawAll)
                 .build();
         var pay = literal("pay")
-                .build(); // TODO
+                .build();
 
         // Building tree
         root.addChild(wbshop);
@@ -86,12 +93,30 @@ public class CommandHandler implements CommandRegistrationCallback {
                     econRemove.addChild(econRemovePlayers);
                         econRemovePlayers.addChild(econRemovePlayersPoints);
                 econ.addChild(econTotal);
+                econ.addChild(econBorderFunction);
+                    econBorderFunction.addChild(econBorderFunctionFunction);
         root.addChild(bal);
         root.addChild(donate);
         root.addChild(withdraw);
             withdraw.addChild(withdrawPoints);
             withdraw.addChild(withdrawAll);
 
+    }
+
+    private int econTotal(CommandContext<ServerCommandSource> context) {
+        long total = WBShop.getEconomy().getTotalPoints();
+        context.getSource().sendFeedback(()-> Text.of("There are a total of " + total + " points in player's accounts."), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int setBorderFunction(CommandContext<ServerCommandSource> context) {
+        String functionString = StringArgumentType.getString(context, "function");
+        if (WBShop.getEconomy().setBorderFunction(functionString)) {
+            context.getSource().sendFeedback(() -> Text.of("Successfully updated border function!"), true);
+            return Command.SINGLE_SUCCESS;
+        }
+        context.getSource().sendError(Text.of("Failed to update border function."));
+        return -1;
     }
 
     private int wbshop(CommandContext<ServerCommandSource> context) {

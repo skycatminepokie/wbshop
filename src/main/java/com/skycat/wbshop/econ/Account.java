@@ -3,6 +3,7 @@ package com.skycat.wbshop.econ;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycat.wbshop.WBShop;
+import com.skycat.wbshop.util.LogLevel;
 import com.skycat.wbshop.util.Utils;
 import eu.pb4.common.economy.api.EconomyAccount;
 import eu.pb4.common.economy.api.EconomyCurrency;
@@ -69,7 +70,7 @@ public class Account implements EconomyAccount {
         long value = WBShop.getEconomy().pointValueOf(stack);
         donatedItemCounts.put(stack.getItem(), current + stack.getCount());
         addBalance(value);
-        totalItemsDonated += stack.getCount(); // TODO: Better way - make a wrapper on hashmap
+        totalItemsDonated += stack.getCount();
         return value;
     }
 
@@ -126,7 +127,6 @@ public class Account implements EconomyAccount {
      * @return {@code false} if the account does not have enough points, {@code true} on success.
      */
     public boolean withdraw(long amount, ServerPlayerEntity player) {
-        // TODO
         if (amount > balance) return false;
         ItemStack voucher = Economy.makeVoucher(amount);
 
@@ -155,7 +155,7 @@ public class Account implements EconomyAccount {
         if (value >= 0) {
             balance = value;
         } else {
-            WBShop.LOGGER.error("Something tried to set the value of account " + id() + " to " + value + ". Negatives are not allowed, defaulting to 0.");
+            Utils.log("Something tried to set the value of account " + id() + " to " + value + ". Negatives are not allowed, defaulting to 0.", LogLevel.WARN);
             balance = 0;
         }
         WBShop.getEconomy().markDirty();
