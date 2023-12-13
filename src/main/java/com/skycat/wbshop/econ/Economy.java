@@ -80,7 +80,6 @@ public class Economy extends PersistentState implements EconomyProvider {
         this.borderFunctionString = borderFunctionString;
     }
 
-    //<editor-fold desc="Serialization">
     public static Economy readFromNbt(NbtCompound nbt) {
         var result = CODEC.decode(NbtOps.INSTANCE, nbt.get("economy")).result();
         if (result.isEmpty()) {
@@ -187,7 +186,6 @@ public class Economy extends PersistentState implements EconomyProvider {
     public Account getOrCreateAccount(ServerPlayerEntity player) {
         return getOrCreateAccount(player.getUuid());
     }
-    //</editor-fold>
 
     public long getTotalPoints() {
         long total = 0;
@@ -197,7 +195,6 @@ public class Economy extends PersistentState implements EconomyProvider {
         return total;
     }
 
-    //<editor-fold desc="Patbox's Common Economy API handling">
     @Override
     public Text name() {
         return Text.of("WBShop Economy");
@@ -240,5 +237,4 @@ public class Economy extends PersistentState implements EconomyProvider {
         nbt.put("economy", encodedResult.get());
         return nbt;
     }
-    //</editor-fold>
 }
