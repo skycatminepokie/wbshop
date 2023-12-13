@@ -40,36 +40,12 @@ public class Economy extends PersistentState implements EconomyProvider {
             Codec.STRING.optionalFieldOf("borderFunctionString", "sqrt(points)").forGetter(Economy::getBorderFunctionString)
     ).apply(economy, Economy::new));
     private final HashMap<UUID, Account> accounts = new HashMap<>(); // Keep it in a HashMap for fast lookup.
-
-    public String getBorderFunctionString() {
-        return borderFunctionString;
-    }
-
     private String borderFunctionString = "sqrt(points)";
     private Expression borderFunction = new ExpressionBuilder(borderFunctionString)
             .variable("points")
             .build();
     private int configVersion = 0;
-
     public Economy() {
-    }
-
-    /**
-     * Try to set the border function.
-     * @param newExpression The string expression to parse.
-     * @return True if the function is valid, false if the function is not valid.
-     */
-    public boolean setBorderFunction(String newExpression) {
-        Expression newFunction = new ExpressionBuilder(newExpression).variable("points").build();
-        newFunction.setVariable("points", getTotalPoints());
-        if (newFunction.validate().isValid()) {
-            borderFunction = newFunction;
-            borderFunctionString = newExpression;
-            markDirty();
-            WBShop.updateBorder();
-            return true;
-        }
-        return false;
     }
 
     private Economy(int configVersion, List<Account> accountList, String borderFunctionString) {
@@ -89,12 +65,53 @@ public class Economy extends PersistentState implements EconomyProvider {
         return result.get().getFirst();
     }
 
-    @Override
-    public @Nullable String defaultAccount(MinecraftServer server, GameProfile profile, EconomyCurrency currency) {
-        if (currency == CURRENCY) {
-            return Account.defaultId().toString();
+    @NotNull
+    public static ItemStack makeVoucher(long amount) {
+        ItemStack voucher = new ItemStack(Items.PAPER, 1);
+
+        NbtCompound nbt = new NbtCompound();
+        // NbtString#of apparently needs the JSON format of a Text in the form of a string
+        nbt.put("wbpoints", NbtLong.of(amount));
+        voucher.setNbt(nbt);
+
+        NbtList lore = new NbtList();
+        lore.add(NbtString.of(Text.Serializer.toJson(Text.of(amount + " point" + (amount == 1 ? "" : "s")))));
+
+        voucher.getOrCreateSubNbt("display").put("Lore", lore);
+
+        voucher.setCustomName(Text.of("Point Voucher"));
+        return voucher;
+    }
+
+    public String getBorderFunctionString() {
+        return borderFunctionString;
+    }
+
+    /**
+     * Try to set the border function.
+     *
+     * @param newExpression The string expression to parse.
+     * @return True if the function is valid, false if the function is not valid.
+     */
+    public boolean setBorderFunction(String newExpression) {
+        Expression newFunction = new ExpressionBuilder(newExpression).variable("points").build();
+        newFunction.setVariable("points", getTotalPoints());
+        if (newFunction.validate().isValid()) {
+            borderFunction = newFunction;
+            borderFunctionString = newExpression;
+            markDirty();
+            WBShop.updateBorder();
+            return true;
         }
-        return null;
+        return false;
+    }
+
+    public long getTotalPoints() {
+        long total = 0;
+        for (Account account : accounts.values()) {
+            total += account.balance();
+        }
+        return total;
     }
 
     /**
@@ -112,14 +129,6 @@ public class Economy extends PersistentState implements EconomyProvider {
         return 5.0;
     }
 
-    @Override
-    public @Nullable EconomyAccount getAccount(MinecraftServer server, GameProfile profile, String accountId) {
-        if (accountId.equals(Account.defaultId().toString())) {
-            return accounts.get(profile.getId());
-        }
-        return null;
-    }
-
     /**
      * Get a list of all accounts.
      * For read-only access.
@@ -130,44 +139,12 @@ public class Economy extends PersistentState implements EconomyProvider {
         return new ArrayList<>(accounts.values());
     }
 
-    @Override
-    public Collection<EconomyAccount> getAccounts(MinecraftServer server, GameProfile profile) {
-        return List.of(accounts.get(profile.getId()));
-    }
-
     public int getConfigVersion() {
         return this.configVersion;
     }
 
-    @Override
-    public Collection<EconomyCurrency> getCurrencies(MinecraftServer server) {
-        return List.of(CURRENCY);
-    }
-
-    @Override
-    public @Nullable EconomyCurrency getCurrency(MinecraftServer server, String currencyId) {
-        if (CURRENCY.id().toString().equals(currencyId)) {
-            return CURRENCY;
-        }
-        return null;
-    }
-
-    @NotNull
-    public static ItemStack makeVoucher(long amount) {
-        ItemStack voucher = new ItemStack(Items.PAPER, 1);
-
-        NbtCompound nbt = new NbtCompound();
-        // NbtString#of apparently needs the JSON format of a Text in the form of a string
-        nbt.put("wbpoints", NbtLong.of(amount));
-        voucher.setNbt(nbt);
-
-        NbtList lore = new NbtList();
-        lore.add(NbtString.of(Text.Serializer.toJson(Text.of(amount + " point" + (amount == 1 ? "": "s")))));
-
-        voucher.getOrCreateSubNbt("display").put("Lore", lore);
-
-        voucher.setCustomName(Text.of("Point Voucher"));
-        return voucher;
+    public Account getOrCreateAccount(GameProfile profile) {
+        return getOrCreateAccount(profile.getId());
     }
 
     public Account getOrCreateAccount(UUID uuid) {
@@ -179,25 +156,47 @@ public class Economy extends PersistentState implements EconomyProvider {
         return newAccount;
     }
 
-    public Account getOrCreateAccount(GameProfile profile) {
-        return getOrCreateAccount(profile.getId());
-    }
-
     public Account getOrCreateAccount(ServerPlayerEntity player) {
         return getOrCreateAccount(player.getUuid());
-    }
-
-    public long getTotalPoints() {
-        long total = 0;
-        for (Account account : accounts.values()) {
-            total += account.balance();
-        }
-        return total;
     }
 
     @Override
     public Text name() {
         return Text.of("WBShop Economy");
+    }
+
+    @Override
+    public @Nullable EconomyAccount getAccount(MinecraftServer server, GameProfile profile, String accountId) {
+        if (accountId.equals(Account.defaultId().toString())) {
+            return accounts.get(profile.getId());
+        }
+        return null;
+    }
+
+    @Override
+    public Collection<EconomyAccount> getAccounts(MinecraftServer server, GameProfile profile) {
+        return List.of(accounts.get(profile.getId()));
+    }
+
+    @Override
+    public @Nullable EconomyCurrency getCurrency(MinecraftServer server, String currencyId) {
+        if (CURRENCY.id().toString().equals(currencyId)) {
+            return CURRENCY;
+        }
+        return null;
+    }
+
+    @Override
+    public Collection<EconomyCurrency> getCurrencies(MinecraftServer server) {
+        return List.of(CURRENCY);
+    }
+
+    @Override
+    public @Nullable String defaultAccount(MinecraftServer server, GameProfile profile, EconomyCurrency currency) {
+        if (currency == CURRENCY) {
+            return Account.defaultId().toString();
+        }
+        return null;
     }
 
     public long pointValueOf(Collection<ItemStack> stacks) {
