@@ -4,6 +4,7 @@ import com.skycat.wbshop.command.CommandHandler;
 import com.skycat.wbshop.econ.Account;
 import com.skycat.wbshop.econ.Economy;
 import com.skycat.wbshop.util.Utils;
+import lombok.NonNull;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -27,10 +28,20 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
     /**
      * Fails when world is remote or not loaded.
      */
-    public static Economy getEconomy() throws BadStateException {
+    public static Economy getEconomy() throws BadStateException { // This shouldn't cause problems with saving/loading, since Minecraft seems to cache it.
         if (server == null) {
             throw new BadStateException("Failed to get economy, server cache was null.");
         }
+        return server.getOverworld().getPersistentStateManager().getOrCreate(Economy::readFromNbt, Economy::new, Economy.SAVE_ID);
+    }
+
+    /**
+     * Counterpart to {@link WBShop#getEconomy()}, requiring a {@link MinecraftServer} but shouldn't fail. <p>
+     * Use this instead of {@link WBShop#getEconomy()} when it's not inconvenient.
+     * @param server The server to grab the economy from.
+     * @return The economy.
+     */
+    public static Economy getEconomy(@NonNull MinecraftServer server) {
         return server.getOverworld().getPersistentStateManager().getOrCreate(Economy::readFromNbt, Economy::new, Economy.SAVE_ID);
     }
 
