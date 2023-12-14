@@ -22,7 +22,6 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
     public static final String MOD_ID = "wbshop";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static @Nullable MinecraftServer server = null;
-    private static Economy economy = null;
     private static final CommandHandler COMMAND_HANDLER = new CommandHandler();
 
     /**
@@ -42,12 +41,13 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
         return server;
     }
 
-    public static void updateBorder() {
-        if (getServer() != null && getEconomy() != null && getServer().getOverworld() != null) {
-            getServer().getOverworld().getWorldBorder().setSize(getEconomy().evaluateBorderSize(economy.getTotalPoints()));
-        } else {
-            Utils.log("Attempted to update border while something was null - this shouldn't happen. Hopefully nothing goes wrong, but please report this.");
+    public static void updateBorder() throws BadStateException {
+        Economy economy = getEconomy();
+        MinecraftServer server = getServer();
+        if (server == null) {
+            throw new BadStateException("Could not update border, since the server was null.");
         }
+        getServer().getOverworld().getWorldBorder().setSize(economy.evaluateBorderSize(economy.getTotalPoints()));
     }
 
     @Override
@@ -75,16 +75,13 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
     @Override
     public void onWorldLoad(MinecraftServer server, ServerWorld world) {
         if (world.isClient) {
-            economy = null; // Potentially unnecessary? Not gonna mess with it though.
             return;
         }
         WBShop.server = server;
-        economy = server.getOverworld().getPersistentStateManager().getOrCreate(Economy::readFromNbt, Economy::new, Economy.SAVE_ID);
     }
 
 
     @Override
     public void onWorldUnload(MinecraftServer server, ServerWorld world) {
-        economy = null;
     }
 }
