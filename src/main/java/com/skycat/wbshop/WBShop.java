@@ -26,10 +26,13 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
     private static final CommandHandler COMMAND_HANDLER = new CommandHandler();
 
     /**
-     * Null when world is remote or not loaded.
+     * Fails when world is remote or not loaded.
      */
-    public static Economy getEconomy() {
-        return economy;
+    public static Economy getEconomy() throws BadStateException {
+        if (server == null) {
+            throw new BadStateException("Failed to get economy, server cache was null.");
+        }
+        return server.getOverworld().getPersistentStateManager().getOrCreate(Economy::readFromNbt, Economy::new, Economy.SAVE_ID);
     }
 
     /**
