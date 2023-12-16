@@ -2,6 +2,7 @@ package com.skycat.wbshop.econ;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.skycat.wbshop.BadStateException;
 import com.skycat.wbshop.WBShop;
 import com.skycat.wbshop.util.LogLevel;
 import com.skycat.wbshop.util.Utils;
@@ -9,6 +10,7 @@ import eu.pb4.common.economy.api.EconomyAccount;
 import eu.pb4.common.economy.api.EconomyCurrency;
 import eu.pb4.common.economy.api.EconomyProvider;
 import eu.pb4.common.economy.api.EconomyTransaction;
+import lombok.SneakyThrows;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -64,6 +66,7 @@ public class Account implements EconomyAccount {
      * @param stack The stack of items to donate.
      * @return The number of points awarded for donating.
      */
+    @SneakyThrows(BadStateException.class)
     public long donateItems(ItemStack stack) {
         if (stack.getItem() == Items.AIR) return 0;
         long current = donatedItemCounts.getOrDefault(stack.getItem(), 0L);
@@ -150,6 +153,7 @@ public class Account implements EconomyAccount {
         return tryTransaction(-value);
     }
 
+    @SneakyThrows(BadStateException.class)
     @Override
     public void setBalance(long value) throws IllegalArgumentException {
         if (value >= 0) {
@@ -162,6 +166,7 @@ public class Account implements EconomyAccount {
         WBShop.updateBorder();
     }
 
+    @SneakyThrows(BadStateException.class)
     @Override
     public EconomyProvider provider() {
         return WBShop.getEconomy();
