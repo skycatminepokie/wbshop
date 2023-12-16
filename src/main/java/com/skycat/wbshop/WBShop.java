@@ -96,11 +96,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
             return;
         }
         WBShop.server = server;
-        try {
-            updateBorder();
-        } catch (BadStateException e) {
-            throw new RuntimeException(e); // State management shouldn't allow this. Probably.
-        }
+        updateBorder(server);
     }
 
 
