@@ -162,7 +162,7 @@ public class CommandHandler implements CommandRegistrationCallback {
 
     private int bal(CommandContext<ServerCommandSource> context) {
         if (context.getSource().getEntity() instanceof ServerPlayerEntity player) {
-            context.getSource().sendFeedback(()-> Text.of("You have " + WBShop.getEconomy(player).getOrCreateAccount(player).balance() + " points."), false);
+            context.getSource().sendFeedback(()-> Text.of("You have " + WBShop.getEconomy(context.getSource().getServer()).getOrCreateAccount(player).balance() + " points."), false);
             return Command.SINGLE_SUCCESS;
         }
         context.getSource().sendError(Text.of("This command must be run by a player."));
