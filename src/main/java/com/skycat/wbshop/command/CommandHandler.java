@@ -9,6 +9,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.skycat.wbshop.WBShop;
 import com.skycat.wbshop.econ.Account;
+import com.skycat.wbshop.econ.Economy;
 import com.skycat.wbshop.gui.DonateGui;
 import com.skycat.wbshop.gui.OverviewGui;
 import me.lucko.fabric.api.permissions.v0.Permissions;
@@ -104,14 +105,14 @@ public class CommandHandler implements CommandRegistrationCallback {
     }
 
     private int econTotal(CommandContext<ServerCommandSource> context) {
-        long total = WBShop.getEconomy().getTotalPoints();
+        long total = WBShop.getEconomy(context.getSource().getServer()).getTotalPoints();
         context.getSource().sendFeedback(()-> Text.of("There are a total of " + total + " points in player's accounts."), false);
         return Command.SINGLE_SUCCESS;
     }
 
     private int setBorderFunction(CommandContext<ServerCommandSource> context) {
         String functionString = StringArgumentType.getString(context, "function");
-        if (WBShop.getEconomy().setBorderFunction(functionString)) {
+        if (WBShop.getEconomy(context.getSource().getServer()).setBorderFunction(functionString)) {
             context.getSource().sendFeedback(() -> Text.of("Successfully updated border function!"), true);
             return Command.SINGLE_SUCCESS;
         }
@@ -130,8 +131,9 @@ public class CommandHandler implements CommandRegistrationCallback {
 
     private int econGet(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         Collection<GameProfile> players = GameProfileArgumentType.getProfileArgument(context, "players");
+        Economy economy = WBShop.getEconomy(context.getSource().getServer());
         for (GameProfile player : players) {
-            long bal = WBShop.getEconomy().getOrCreateAccount(player).balance();
+            long bal = economy.getOrCreateAccount(player).balance();
             context.getSource().sendFeedback(() -> Text.of(player.getName() + " has " + bal + " points."), false);
         }
         return players.size();
@@ -141,8 +143,9 @@ public class CommandHandler implements CommandRegistrationCallback {
     private int econRemove(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         long points = LongArgumentType.getLong(context, "points");
         Collection<GameProfile> players = GameProfileArgumentType.getProfileArgument(context, "players");
+        Economy economy = WBShop.getEconomy(context.getSource().getServer());
         for (GameProfile player : players) {
-            WBShop.getEconomy().getOrCreateAccount(player).removeBalance(points);
+            economy.getOrCreateAccount(player).removeBalance(points);
             context.getSource().sendFeedback(() -> Text.literal("Removed " + points + " points from ").append(player.getName()), false);
         }
         return players.size();
@@ -159,7 +162,7 @@ public class CommandHandler implements CommandRegistrationCallback {
 
     private int bal(CommandContext<ServerCommandSource> context) {
         if (context.getSource().getEntity() instanceof ServerPlayerEntity player) {
-            context.getSource().sendFeedback(()-> Text.of("You have " + WBShop.getEconomy().getOrCreateAccount(player).balance() + " points."), false);
+            context.getSource().sendFeedback(()-> Text.of("You have " + WBShop.getEconomy(player).getOrCreateAccount(player).balance() + " points."), false);
             return Command.SINGLE_SUCCESS;
         }
         context.getSource().sendError(Text.of("This command must be run by a player."));
@@ -172,7 +175,7 @@ public class CommandHandler implements CommandRegistrationCallback {
             context.getSource().sendError(Text.of("This command must be executed by a player!"));
             return -1;
         }
-        Account account = WBShop.getEconomy().getOrCreateAccount(player);
+        Account account = WBShop.getEconomy(player).getOrCreateAccount(player);
 
         long points;
         try {
@@ -196,7 +199,7 @@ public class CommandHandler implements CommandRegistrationCallback {
             context.getSource().sendError(Text.of("This command must be executed by a player!"));
             return -1;
         }
-        Account account = WBShop.getEconomy().getOrCreateAccount(player);
+        Account account = WBShop.getEconomy(player).getOrCreateAccount(player);
 
         return account.withdraw(account.balance(), player) ? Command.SINGLE_SUCCESS : (0 /* Should not happen unless there's some weird desync */);
     }
@@ -204,8 +207,9 @@ public class CommandHandler implements CommandRegistrationCallback {
     private int econAdd(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         long points = LongArgumentType.getLong(context, "points");
         Collection<GameProfile> players = GameProfileArgumentType.getProfileArgument(context, "players");
+        Economy economy = WBShop.getEconomy(context.getSource().getServer());
         for (GameProfile player : players) {
-            WBShop.getEconomy().getOrCreateAccount(player).addBalance(points);
+            economy.getOrCreateAccount(player).addBalance(points);
             context.getSource().sendFeedback(() -> Text.literal("Gave " + points + " points to ").append(player.getName()), false);
         }
         return players.size();
