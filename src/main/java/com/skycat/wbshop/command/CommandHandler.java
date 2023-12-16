@@ -112,7 +112,7 @@ public class CommandHandler implements CommandRegistrationCallback {
 
     private int setBorderFunction(CommandContext<ServerCommandSource> context) {
         String functionString = StringArgumentType.getString(context, "function");
-        if (WBShop.getEconomy(context.getSource().getServer()).setBorderFunction(functionString)) {
+        if (WBShop.getEconomy(context.getSource().getServer()).setBorderFunction(functionString, context.getSource().getServer())) {
             context.getSource().sendFeedback(() -> Text.of("Successfully updated border function!"), true);
             return Command.SINGLE_SUCCESS;
         }

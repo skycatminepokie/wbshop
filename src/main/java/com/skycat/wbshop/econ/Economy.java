@@ -8,6 +8,7 @@ import com.skycat.wbshop.util.Utils;
 import eu.pb4.common.economy.api.EconomyAccount;
 import eu.pb4.common.economy.api.EconomyCurrency;
 import eu.pb4.common.economy.api.EconomyProvider;
+import lombok.NonNull;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -91,16 +92,17 @@ public class Economy extends PersistentState implements EconomyProvider {
      * Try to set the border function.
      *
      * @param newExpression The string expression to parse.
+     * @param server
      * @return True if the function is valid, false if the function is not valid.
      */
-    public boolean setBorderFunction(String newExpression) {
+    public boolean setBorderFunction(String newExpression, @NonNull MinecraftServer server) {
         Expression newFunction = new ExpressionBuilder(newExpression).variable("points").build();
         newFunction.setVariable("points", getTotalPoints());
         if (newFunction.validate().isValid()) {
             borderFunction = newFunction;
             borderFunctionString = newExpression;
             markDirty();
-            WBShop.updateBorder();
+            WBShop.updateBorder(server);
             return true;
         }
         return false;

@@ -60,12 +60,15 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
     }
 
     public static void updateBorder() throws BadStateException {
-        Economy economy = getEconomy();
-        MinecraftServer server = getServer();
         if (server == null) {
             throw new BadStateException("Could not update border, since the server was null.");
         }
-        getServer().getOverworld().getWorldBorder().setSize(economy.evaluateBorderSize(economy.getTotalPoints()));
+        updateBorder(server);
+    }
+
+    public static void updateBorder(@NonNull MinecraftServer server) {
+        Economy economy = getEconomy(server);
+        server.getOverworld().getWorldBorder().setSize(economy.evaluateBorderSize(economy.getTotalPoints()));
     }
 
     @Override
