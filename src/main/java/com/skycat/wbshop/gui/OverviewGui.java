@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import com.skycat.wbshop.WBShop;
 import com.skycat.wbshop.econ.Account;
 import com.skycat.wbshop.econ.Economy;
-import com.skycat.wbshop.util.Utils;
 import eu.pb4.sgui.api.ClickType;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
@@ -45,11 +44,6 @@ public class OverviewGui extends LayeredGui {
         this.player = player;
         MinecraftServer server = player.getServer();
         Economy econ = WBShop.getEconomy(player);
-        if (server == null) {
-            Utils.log("Unable to open overview gui, server or economy is null.");
-            backgroundLayer.setSlot(backgroundLayer.getSize() / 2, new GuiElementBuilder(Items.BARRIER).setName(Text.of("Unable to open overview gui, server or economy is null.")));
-            return;
-        }
         Account account = econ.getOrCreateAccount(player);
         addLayer(initMenuBarLayer(server, account, econ), 0, 0);
         ListLayer topPlayerLayer = initTopPlayerLayer(server, econ);
