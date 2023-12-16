@@ -3,10 +3,12 @@ package com.skycat.wbshop;
 import com.skycat.wbshop.command.CommandHandler;
 import com.skycat.wbshop.econ.Account;
 import com.skycat.wbshop.econ.Economy;
+import eu.pb4.common.economy.api.CommonEconomy;
 import lombok.NonNull;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -20,11 +22,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
-public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWorldEvents.Unload, ServerLivingEntityEvents.AfterDeath {
+public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerLifecycleEvents.ServerStarting, ServerLivingEntityEvents.AfterDeath, ServerLifecycleEvents.ServerStopping {
     public static final String MOD_ID = "wbshop";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    private static @Nullable MinecraftServer server = null;
     private static final CommandHandler COMMAND_HANDLER = new CommandHandler();
+    private static @Nullable MinecraftServer server = null;
 
     /**
      * Fails when world is remote or not loaded.
@@ -39,6 +41,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
     /**
      * Counterpart to {@link WBShop#getEconomy()}, requiring a {@link MinecraftServer} but shouldn't fail. <p>
      * Use this instead of {@link WBShop#getEconomy()} when it's not inconvenient.
+     *
      * @param server The server to grab the economy from.
      * @return The economy.
      */
@@ -46,17 +49,17 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
         return Objects.requireNonNull(server.getOverworld().getPersistentStateManager().getOrCreate(Economy::readFromNbt, Economy::new, Economy.SAVE_ID)); // I'm pretty confident in that requireNonNull.
     }
 
+    public static @NonNull Economy getEconomy(@NonNull ServerPlayerEntity player) {
+        MinecraftServer server = player.getServer();
+        assert server != null;
+        return getEconomy(server);
+    }
+
     /**
      * Null when world is remote or not loaded.
      */
     public static @Nullable MinecraftServer getServer() {
         return server;
-    }
-
-    public static @NonNull Economy getEconomy(@NonNull ServerPlayerEntity player) {
-        MinecraftServer server = player.getServer();
-        assert server != null;
-        return getEconomy(server);
     }
 
     public static void updateBorder() throws BadStateException {
@@ -84,23 +87,26 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
 
     @Override
     public void onInitialize() {
+        ServerLifecycleEvents.SERVER_STARTING.register(this);
+        ServerLifecycleEvents.SERVER_STOPPING.register(this);
         ServerWorldEvents.LOAD.register(this);
-        CommandRegistrationCallback.EVENT.register(COMMAND_HANDLER);
         ServerLivingEntityEvents.AFTER_DEATH.register(this);
-        // CommonEconomy.register(EconomyProvider) // Hmm. How is this gonna work?
+        CommandRegistrationCallback.EVENT.register(COMMAND_HANDLER);
+    }
+
+    @Override
+    public void onServerStarting(MinecraftServer server) {
+        WBShop.server = server;
+        CommonEconomy.register(Economy.PROVIDER_ID.toString(), getEconomy(server));
+    }
+
+    @Override
+    public void onServerStopping(MinecraftServer server) {
+        WBShop.server = null;
     }
 
     @Override
     public void onWorldLoad(MinecraftServer server, ServerWorld world) {
-        if (world.isClient) {
-            return;
-        }
-        WBShop.server = server;
         updateBorder(server);
-    }
-
-
-    @Override
-    public void onWorldUnload(MinecraftServer server, ServerWorld world) {
     }
 }

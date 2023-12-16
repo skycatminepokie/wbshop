@@ -16,6 +16,7 @@ import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.PersistentState;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
@@ -34,6 +35,7 @@ public class Economy extends PersistentState implements EconomyProvider {
      * The file prefix for the save location: {@code world/data/$SAVE_ID.dat}
      */
     public static final String SAVE_ID = WBShop.MOD_ID + "_economy";
+    public static final Identifier PROVIDER_ID = Objects.requireNonNull(Identifier.of("wbshop", "economy"));
     public static final Points CURRENCY = new Points();
     public static final Codec<Economy> CODEC = RecordCodecBuilder.create(economy -> economy.group(
             Codec.INT.fieldOf("configVersion").forGetter(Economy::getConfigVersion),
@@ -46,6 +48,7 @@ public class Economy extends PersistentState implements EconomyProvider {
             .variable("points")
             .build();
     private int configVersion = 0;
+
     public Economy() {
     }
 
