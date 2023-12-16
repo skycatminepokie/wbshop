@@ -3,7 +3,6 @@ package com.skycat.wbshop;
 import com.skycat.wbshop.command.CommandHandler;
 import com.skycat.wbshop.econ.Account;
 import com.skycat.wbshop.econ.Economy;
-import com.skycat.wbshop.util.Utils;
 import lombok.NonNull;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;

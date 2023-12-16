@@ -44,8 +44,8 @@ public class OverviewGui extends LayeredGui {
         super(ScreenHandlerType.GENERIC_9X6, player, false);
         this.player = player;
         MinecraftServer server = player.getServer();
-        Economy econ = WBShop.getEconomy();
-        if (server == null || econ == null) {
+        Economy econ = WBShop.getEconomy(player);
+        if (server == null) {
             Utils.log("Unable to open overview gui, server or economy is null.");
             backgroundLayer.setSlot(backgroundLayer.getSize() / 2, new GuiElementBuilder(Items.BARRIER).setName(Text.of("Unable to open overview gui, server or economy is null.")));
             return;
