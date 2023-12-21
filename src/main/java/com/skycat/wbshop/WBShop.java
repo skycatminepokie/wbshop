@@ -7,6 +7,7 @@ import com.skycat.wbshop.util.Utils;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -18,12 +19,13 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWorldEvents.Unload, ServerLivingEntityEvents.AfterDeath {
+public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWorldEvents.Unload, ServerLivingEntityEvents.AfterDeath, ServerLifecycleEvents.ServerStopping {
     public static final String MOD_ID = "wbshop";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static @Nullable MinecraftServer server = null;
     private static Economy economy = null;
     private static final CommandHandler COMMAND_HANDLER = new CommandHandler();
+    public static GlobalConfig globalConfig = GlobalConfig.load();
 
     /**
      * Null when world is remote or not loaded.
@@ -40,7 +42,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
     }
 
     public static void updateBorder() {
-        if (getServer() != null && getEconomy() != null && getServer().getOverworld() != null) {
+        if (getServer() != null && getEconomy() != null && getServer().getOverworld() != null) { // WARN something can easily be null here
             getServer().getOverworld().getWorldBorder().setSize(getEconomy().evaluateBorderSize(economy.getTotalPoints()));
         } else {
             Utils.log("Attempted to update border while something was null - this shouldn't happen. Hopefully nothing goes wrong, but please report this.");
@@ -65,8 +67,14 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerWor
         ServerWorldEvents.LOAD.register(this);
         CommandRegistrationCallback.EVENT.register(COMMAND_HANDLER);
         ServerLivingEntityEvents.AFTER_DEATH.register(this);
+        ServerLifecycleEvents.SERVER_STOPPING.register(this);
         updateBorder();
         // CommonEconomy.register(EconomyProvider) // Hmm. How is this gonna work?
+    }
+
+    @Override
+    public void onServerStopping(MinecraftServer server) {
+        globalConfig.save();
     }
 
     @Override

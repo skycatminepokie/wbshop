@@ -223,7 +223,7 @@ public class Economy extends PersistentState implements EconomyProvider {
     }
 
     public long pointValueOf(Item itemType) {
-        return (itemType == Items.AIR) ? 0 : 1;
+        return WBShop.globalConfig.getItemValue(itemType);
     }
 
     @Override
