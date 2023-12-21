@@ -94,7 +94,7 @@ public class Economy extends PersistentState implements EconomyProvider {
      * Try to set the border function.
      *
      * @param newExpression The string expression to parse.
-     * @param server
+     * @param server The server to set the border on
      * @return True if the function is valid, false if the function is not valid.
      */
     public boolean setBorderFunction(String newExpression, @NonNull MinecraftServer server) {
