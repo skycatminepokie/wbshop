@@ -72,7 +72,7 @@ public class GlobalConfig {
         if (cachedValue != null) return cachedValue; // If we have the value cached, use that.
         long value = 1;
         for (Map.Entry<Pattern, Long> entry : itemValueRules.entrySet()) {
-            if (entry.getKey().matcher(Registries.ITEM.getId(Items.AIR).toString()).find()) { // If it matches
+            if (entry.getKey().matcher(Registries.ITEM.getId(item).toString()).find()) { // If it matches
                 value = entry.getValue(); // Set the new value
                 break;
             }
