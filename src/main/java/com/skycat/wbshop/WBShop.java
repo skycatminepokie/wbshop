@@ -3,6 +3,7 @@ package com.skycat.wbshop;
 import com.skycat.wbshop.command.CommandHandler;
 import com.skycat.wbshop.econ.Account;
 import com.skycat.wbshop.econ.Economy;
+import com.skycat.wbshop.util.Utils;
 import eu.pb4.common.economy.api.CommonEconomy;
 import lombok.NonNull;
 import net.fabricmc.api.ModInitializer;
@@ -40,7 +41,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerLif
     }
 
     /**
-     * Counterpart to {@link WBShop#getEconomy()}, requiring a {@link MinecraftServer} but shouldn't fail. <p>
+     * Counterpart to {@link WBShop#getEconomy()}, requiring a {@link MinecraftServer} but shouldn't fail as long as the world is loaded. <p>
      * Use this instead of {@link WBShop#getEconomy()} when it's not inconvenient.
      *
      * @param server The server to grab the economy from.
@@ -98,7 +99,6 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerLif
     @Override
     public void onServerStarting(MinecraftServer server) {
         WBShop.server = server;
-        CommonEconomy.register(Economy.PROVIDER_ID.toString(), getEconomy(server));
     }
 
     @Override
@@ -109,6 +109,10 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerLif
 
     @Override
     public void onWorldLoad(MinecraftServer server, ServerWorld world) {
+        if (server.getOverworld() == world) {
+            CommonEconomy.register(Economy.PROVIDER_ID, getEconomy(server));
+            Utils.log("Registered economy with Common Economy API");
+        }
         updateBorder(server);
     }
 }
