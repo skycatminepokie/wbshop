@@ -8,6 +8,7 @@ import com.skycat.wbshop.util.Utils;
 import eu.pb4.common.economy.api.EconomyAccount;
 import eu.pb4.common.economy.api.EconomyCurrency;
 import eu.pb4.common.economy.api.EconomyProvider;
+import lombok.NonNull;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -15,6 +16,7 @@ import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.PersistentState;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
@@ -33,6 +35,7 @@ public class Economy extends PersistentState implements EconomyProvider {
      * The file prefix for the save location: {@code world/data/$SAVE_ID.dat}
      */
     public static final String SAVE_ID = WBShop.MOD_ID + "_economy";
+    public static final Identifier PROVIDER_ID = Objects.requireNonNull(Identifier.of("wbshop", "economy"));
     public static final Points CURRENCY = new Points();
     public static final Codec<Economy> CODEC = RecordCodecBuilder.create(economy -> economy.group(
             Codec.INT.fieldOf("configVersion").forGetter(Economy::getConfigVersion),
@@ -45,6 +48,7 @@ public class Economy extends PersistentState implements EconomyProvider {
             .variable("points")
             .build();
     private int configVersion = 0;
+
     public Economy() {
     }
 
@@ -91,16 +95,17 @@ public class Economy extends PersistentState implements EconomyProvider {
      * Try to set the border function.
      *
      * @param newExpression The string expression to parse.
+     * @param server
      * @return True if the function is valid, false if the function is not valid.
      */
-    public boolean setBorderFunction(String newExpression) {
+    public boolean setBorderFunction(String newExpression, @NonNull MinecraftServer server) {
         Expression newFunction = new ExpressionBuilder(newExpression).variable("points").build();
         newFunction.setVariable("points", getTotalPoints());
         if (newFunction.validate().isValid()) {
             borderFunction = newFunction;
             borderFunctionString = newExpression;
             markDirty();
-            WBShop.updateBorder();
+            WBShop.updateBorder(server);
             return true;
         }
         return false;
