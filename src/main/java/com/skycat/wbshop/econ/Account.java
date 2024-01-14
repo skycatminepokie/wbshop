@@ -130,6 +130,7 @@ public class Account implements EconomyAccount {
      * @return {@code false} if the account does not have enough points, {@code true} on success.
      */
     public boolean withdraw(long amount, ServerPlayerEntity player) {
+        if (amount <= 0) return false;
         if (amount > balance) return false;
         ItemStack voucher = Economy.makeVoucher(amount);
 

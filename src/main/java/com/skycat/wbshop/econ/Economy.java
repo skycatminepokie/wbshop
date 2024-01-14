@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycat.wbshop.WBShop;
+import com.skycat.wbshop.util.LogLevel;
 import com.skycat.wbshop.util.Utils;
 import eu.pb4.common.economy.api.EconomyAccount;
 import eu.pb4.common.economy.api.EconomyCurrency;
@@ -70,6 +71,9 @@ public class Economy extends PersistentState implements EconomyProvider {
 
     @NotNull
     public static ItemStack makeVoucher(long amount) {
+        if (amount <= 0) {
+            Utils.log("Making voucher for " + amount + " points, which is <= 0. That's strange, but we'll do it anyway...", LogLevel.WARN);
+        }
         ItemStack voucher = new ItemStack(Items.PAPER, 1);
 
         NbtCompound nbt = new NbtCompound();
