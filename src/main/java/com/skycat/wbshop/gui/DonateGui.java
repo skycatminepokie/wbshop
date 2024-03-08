@@ -1,7 +1,6 @@
 package com.skycat.wbshop.gui;
 
 import com.skycat.wbshop.WBShop;
-import com.skycat.wbshop.util.Utils;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.elements.GuiElementInterface;
@@ -40,7 +39,7 @@ public class DonateGui extends SimpleGui { // Slight problem: When force closed 
         currentBalanceIcon = makeCurrentBalanceIcon(player);
         donationWorthIcon = new GuiElement(new ItemStack(Items.PAPER, 1), GuiElementInterface.EMPTY_CALLBACK); // TODO
         itemsDonatedIcon = new GuiElementBuilder(Items.CHEST)
-                .setName(Text.of("Items donated: "+ WBShop.getEconomy().getOrCreateAccount(player).getTotalItemsDonated()))
+                .setName(Text.of("Items donated: "+ WBShop.getEconomy(player).getOrCreateAccount(player).getTotalItemsDonated()))
                 .build();
         autoDonateIcon = new GuiElementBuilder(Items.BARRIER)
                 .setName(Text.of("Coming eventually!"))
@@ -65,7 +64,7 @@ public class DonateGui extends SimpleGui { // Slight problem: When force closed 
         if (startingIndex + numberOfIcons > this.getSize()) {
             throw new IllegalArgumentException("startingIndex + numberOfIcons may not exceed number of slots");
         }
-        HashMap<Item, Long> donatedItems = WBShop.getEconomy().getOrCreateAccount(player).getDonatedItemCounts();
+        HashMap<Item, Long> donatedItems = WBShop.getEconomy(player).getOrCreateAccount(player).getDonatedItemCounts();
         ArrayList<Map.Entry<Item, Long>> itemList = new ArrayList<>(donatedItems.entrySet());
         itemList.sort(Map.Entry.comparingByValue());
         for (int i = 0; i < numberOfIcons; i++) {
@@ -94,13 +93,9 @@ public class DonateGui extends SimpleGui { // Slight problem: When force closed 
         GuiElementBuilder builder = new GuiElementBuilder(Items.PLAYER_HEAD);
         if (server != null) {
             builder.setSkullOwner(player.getGameProfile(), server);
-        }
-        if (WBShop.getEconomy() != null) {
-            long balance = WBShop.getEconomy().getOrCreateAccount(player).balance();
+
+            long balance = WBShop.getEconomy(server).getOrCreateAccount(player).balance();
             builder.setName(Text.of("You have " + balance + " points."));
-        } else {
-            builder.setName(Text.of("Error loading points."));
-            Utils.log("Couldn't create points stack for player " + player.getUuid() + ": Economy was null");
         }
         return builder.build();
     }
@@ -108,6 +103,6 @@ public class DonateGui extends SimpleGui { // Slight problem: When force closed 
     @Override
     public void onClose() {
         super.onClose();
-        WBShop.getEconomy().getOrCreateAccount(player).donateItems(donationInventory.stacks);
+        WBShop.getEconomy(player).getOrCreateAccount(player).donateItems(donationInventory.stacks);
     }
 }
