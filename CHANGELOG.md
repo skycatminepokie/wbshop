@@ -1,1 +1,2 @@
 - Fixed crash when loading multiple worlds in singleplayer (#18)
+- Automatically generate points config file (#18)

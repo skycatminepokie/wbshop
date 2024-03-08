@@ -3,6 +3,7 @@ package com.skycat.wbshop;
 import com.skycat.wbshop.command.CommandHandler;
 import com.skycat.wbshop.econ.Account;
 import com.skycat.wbshop.econ.Economy;
+import com.skycat.wbshop.util.LogLevel;
 import com.skycat.wbshop.util.Utils;
 import eu.pb4.common.economy.api.CommonEconomy;
 import lombok.NonNull;
@@ -104,7 +105,9 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerLif
     @Override
     public void onServerStopping(MinecraftServer server) {
         WBShop.server = null;
-        globalConfig.save();
+        if (!globalConfig.save()) {
+            Utils.log("Failed to save the global config!", LogLevel.ERROR);
+        }
     }
 
     @Override
