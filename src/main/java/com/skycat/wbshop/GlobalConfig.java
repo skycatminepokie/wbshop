@@ -10,6 +10,7 @@ import net.minecraft.registry.Registries;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class GlobalConfig {
+    public static final File CONFIG_PATH = new File("config/wbshop");
     public static final File CONFIG_FILE = new File("config/wbshop/itemValues.txt");
     public static final Codec<GlobalConfig> CODEC = Utils.hashMapCodec(Registries.ITEM.getCodec(), "item", Codec.LONG, "value")
             .xmap(GlobalConfig::new, GlobalConfig::getItemValueCache);
@@ -41,8 +43,8 @@ public class GlobalConfig {
     }
 
     public static GlobalConfig load() {
-        if (!CONFIG_FILE.exists()) { // If the file doesn't exist, make a new one.
-            GlobalConfig newConfig =new GlobalConfig();
+        if (!CONFIG_FILE.exists()) { // If the file doesn't exist, make a new config.
+            GlobalConfig newConfig = new GlobalConfig();
             newConfig.markDirty(); // Just so that the file will be around to edit.
             return newConfig;
         }
@@ -104,6 +106,17 @@ public class GlobalConfig {
      */
     public boolean save() {
         if (!isDirty()) return true;
+        if (!CONFIG_FILE.exists()) { // Create file if it doesn't exist
+            try {
+                // Make the file directory, then the file. If either fails, return false.
+                CONFIG_PATH.mkdirs();
+                if (!CONFIG_FILE.createNewFile()) {
+                    return false;
+                }
+            } catch (IOException e) {
+                return false;
+            }
+        }
         try (PrintWriter pw = new PrintWriter(CONFIG_FILE)) {
             itemValueRules.forEach((pattern, value) -> pw.write(pattern.toString() + ";" + value + "\n")); // Write it all :)))
         } catch (FileNotFoundException e) {
