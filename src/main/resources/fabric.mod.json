@@ -4,7 +4,9 @@
   "version": "${version}",
   "name": "wbshop",
   "description": "",
-  "authors": [],
+  "authors": [
+    "skycatminepokie"
+  ],
   "contact": {
     "repo": "https://github.com/skycatminepokie/wbshop"
   },
