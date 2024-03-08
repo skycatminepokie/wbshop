@@ -1,5 +1,2 @@
-- Added configuration for item values
-  - Item values stored in `config/wbshop/itemValues.txt` in the form `regex;value`
-    - Regex matches the item identifier (ex `minecraft:stone`). Value must be a long (integer number but bigger)
-- Fixed a bunch of state management issues
+- Fixed the border function not loading
 - Prevent withdrawing zero point vouchers

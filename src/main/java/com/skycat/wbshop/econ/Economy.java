@@ -30,9 +30,9 @@ import java.util.*;
  *
  * @author skycatminepokie
  */
-public class Economy extends PersistentState implements EconomyProvider {
+public class Economy extends PersistentState implements EconomyProvider { // TODO: Cleanup, especially not having defaults set outside of constructor
     /**
-     * The file prefix for the save location: {@code world/data/$SAVE_ID.dat}
+     * The file prefix for the save location: {@code world/data/SAVE_ID.dat}
      */
     public static final String SAVE_ID = WBShop.MOD_ID + "_economy";
     public static final String PROVIDER_ID = "wbshop";
@@ -58,6 +58,9 @@ public class Economy extends PersistentState implements EconomyProvider {
             accounts.put(account.owner(), account);
         }
         this.borderFunctionString = borderFunctionString;
+        borderFunction = new ExpressionBuilder(borderFunctionString)
+                .variable("points")
+                .build();
     }
 
     public static Economy readFromNbt(NbtCompound nbt) {
