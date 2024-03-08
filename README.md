@@ -8,12 +8,14 @@ Fight the world border for every block! Donate items to expand the world border.
 | `/bal` | Get the number of points you have. | None |
 | `/withdraw` | Withdraw your balance into a point voucher. Donate the point voucher to redeem your balance. | None |
 | `/withdraw all` | Withdraw all of your balance. | None |
+| `/donate` | Donate items for points. Add items to the inventory that opens and close the GUI to donate them. Be careful! There's no way to get them back. | None |
 | `/wbshop econ` | Manage the economy | `wbshop.econ` or OP level 4 |
 | `/wbshop econ borderfunction` | Set the function used to calculate the border size. Functions are parsed using [exp4j](https://github.com/fasseg/exp4j) and the variable "points." Make sure to use quotes around the function (ex: `/wbshop econ borderfunction "0.1points"` for 10 points per block wide) | `wbshop.econ` or OP level 4 |
 | `/wbshop econ get` | Get the number of points that (a) player(s) has. | `wbshop.econ` or OP level 4 |
 | `/wbshop econ add` | Add points to player(s). | `wbshop.econ` or OP level 4 |
 | `/wbshop econ remove` | Remove points from player(s). | `wbshop.econ` or OP level 4 |
 | `/wbshop econ total` | Get the total number of points in the economy. | `wbshop.econ` or OP level 4 |
+
 
 ### Probably important legal info
 wbshop is licensed under the MIT license.
