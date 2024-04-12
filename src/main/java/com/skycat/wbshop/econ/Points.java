@@ -8,6 +8,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class Points implements EconomyCurrency {
+    public static final Identifier ID = Identifier.of(WBShop.MOD_ID, "points");
+    public static final String STRING_ID = "points";
     @Override
     public Text name() {
         return Text.of("Points");
@@ -15,7 +17,7 @@ public class Points implements EconomyCurrency {
 
     @Override
     public Identifier id() {
-        return Identifier.of(WBShop.MOD_ID, "points");
+        return ID;
     }
 
     @Override

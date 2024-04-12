@@ -1,2 +1,2 @@
-- Fixed crash when loading multiple worlds in singleplayer (#18)
-- Automatically generate points config file (#18)
+- Added the icon to the mod
+- Fixed Economy API compatibility (thanks to @basiqueevangelist for open-sourcing their code)

@@ -25,14 +25,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class Account implements EconomyAccount {
-    private final UUID owner;
-    /**
-     * The balance of this account. Modify only via {@link Account#setBalance(long)}.
-     */
-    private long balance;
-    private final HashMap<Item, Long> donatedItemCounts;
-    private long totalItemsDonated;
-
+    public static final String POINTS_ACCOUNT = "points_account";
     public static final Codec<Account> CODEC = RecordCodecBuilder.create((account) -> account.group(
             Uuids.CODEC.fieldOf("owner").forGetter(Account::owner),
             Codec.LONG.fieldOf("balance").forGetter(Account::balance),
@@ -43,39 +36,15 @@ public class Account implements EconomyAccount {
                     "count"
             ).fieldOf("donatedItemCounts").forGetter(Account::getDonatedItemCounts)
     ).apply(account, Account::new));
-
-
-    public HashMap<Item, Long> getDonatedItemCounts() {
-        return donatedItemCounts;
-    }
+    public static final Identifier ID = Identifier.of(WBShop.MOD_ID, POINTS_ACCOUNT);
+    private final UUID owner;
+    private final HashMap<Item, Long> donatedItemCounts;
     /**
-     * Record items as donated and award points.
-     * @param items The stacks of items to donate.
-     * @return The number of points awarded for donating.
+     * The balance of this account. Modify only via {@link Account#setBalance(long)}.
      */
-    public long donateItems(Collection<ItemStack> items) {
-        long value = 0L;
-        for (ItemStack stack : items) {
-            value += donateItems(stack);
-        }
-        return value;
-    }
+    private long balance;
+    private long totalItemsDonated;
 
-    /**
-     * Record items as donated and award points.
-     * @param stack The stack of items to donate.
-     * @return The number of points awarded for donating.
-     */
-    @SneakyThrows(BadStateException.class)
-    public long donateItems(ItemStack stack) {
-        if (stack.getItem() == Items.AIR) return 0;
-        long current = donatedItemCounts.getOrDefault(stack.getItem(), 0L);
-        long value = WBShop.getEconomy().pointValueOf(stack);
-        donatedItemCounts.put(stack.getItem(), current + stack.getCount());
-        addBalance(value);
-        totalItemsDonated += stack.getCount();
-        return value;
-    }
 
     public Account(UUID owner) {
         this(owner, 0);
@@ -95,23 +64,54 @@ public class Account implements EconomyAccount {
         }
     }
 
+    /**
+     * Record items as donated and award points.
+     *
+     * @param items The stacks of items to donate.
+     * @return The number of points awarded for donating.
+     */
+    public long donateItems(Collection<ItemStack> items) {
+        long value = 0L;
+        for (ItemStack stack : items) {
+            value += donateItems(stack);
+        }
+        return value;
+    }
+
+    /**
+     * Record items as donated and award points.
+     *
+     * @param stack The stack of items to donate.
+     * @return The number of points awarded for donating.
+     */
+    @SneakyThrows(BadStateException.class)
+    public long donateItems(ItemStack stack) {
+        if (stack.getItem() == Items.AIR) return 0;
+        long current = donatedItemCounts.getOrDefault(stack.getItem(), 0L);
+        long value = WBShop.getEconomy().pointValueOf(stack);
+        donatedItemCounts.put(stack.getItem(), current + stack.getCount());
+        addBalance(value);
+        totalItemsDonated += stack.getCount();
+        return value;
+    }
+
     public void addBalance(long value) {
         setBalance(balance + value);
+    }
+
+    public HashMap<Item, Long> getDonatedItemCounts() {
+        return donatedItemCounts;
     }
 
     public long getTotalItemsDonated() {
         return totalItemsDonated;
     }
 
-    public void removeBalance(long value) {
-        addBalance(-value);
-    }
-
     //<editor-fold desc="Patbox's Economy API Handling">
     @Override
     public Text name() {
         return Text.of("Worldborder Shop Account");
-    }
+    } // TODO: add player's name
 
     @Override
     public UUID owner() {
@@ -119,24 +119,8 @@ public class Account implements EconomyAccount {
     }
 
     @Override
-    public Identifier id() { // I believe this is the type of account this is
-        return defaultId();
-    }
-
-    /**
-     * Used for withdrawing points to a voucher.
-     * @param amount The amount to take from the player's account and grant as a voucher.
-     * @param player The player to grant the voucher to. This can be someone other than the account owner, but I don't see why you'd do that.
-     * @return {@code false} if the account does not have enough points, {@code true} on success.
-     */
-    public boolean withdraw(long amount, ServerPlayerEntity player) {
-        if (amount <= 0) return false;
-        if (amount > balance) return false;
-        ItemStack voucher = Economy.makeVoucher(amount);
-
-        player.getInventory().offerOrDrop(voucher);
-        removeBalance(amount);
-        return true;
+    public Identifier id() {
+        return ID;
     }
 
     @Override
@@ -179,7 +163,7 @@ public class Account implements EconomyAccount {
     }
 
     public EconomyTransaction tryTransaction(long value) {
-        if (balance + value >= 0){
+        if (balance + value >= 0) {
             long old = balance;
             addBalance(value);
             return new EconomyTransaction.Simple(true,
@@ -190,11 +174,30 @@ public class Account implements EconomyAccount {
                     this
             );
         }
-        return new EconomyTransaction.Simple(false, Text.of("Transaction failed"), balance, balance,value, this);
-    }
-    public static Identifier defaultId() {
-        return Identifier.of(WBShop.MOD_ID, "points_account");
+        return new EconomyTransaction.Simple(false, Text.of("Transaction failed"), balance, balance, value, this);
     }
     //</editor-fold>
+
+
+    /**
+     * Used for withdrawing points to a voucher.
+     *
+     * @param amount The amount to take from the player's account and grant as a voucher.
+     * @param player The player to grant the voucher to. This can be someone other than the account owner, but I don't see why you'd do that.
+     * @return {@code false} if the account does not have enough points, {@code true} on success.
+     */
+    public boolean withdraw(long amount, ServerPlayerEntity player) {
+        if (amount <= 0) return false;
+        if (amount > balance) return false;
+        ItemStack voucher = Economy.makeVoucher(amount);
+
+        player.getInventory().offerOrDrop(voucher);
+        removeBalance(amount);
+        return true;
+    }
+
+    public void removeBalance(long value) {
+        addBalance(-value);
+    }
 
 }

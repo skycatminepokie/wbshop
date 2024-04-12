@@ -63,15 +63,6 @@ public class Economy extends PersistentState implements EconomyProvider { // TOD
                 .build();
     }
 
-    public static Economy readFromNbt(NbtCompound nbt) {
-        var result = CODEC.decode(NbtOps.INSTANCE, nbt.get("economy")).result();
-        if (result.isEmpty()) {
-            Utils.log("WBShop couldn't load the economy. This is normal when you start a new world.");
-            return null;
-        }
-        return result.get().getFirst();
-    }
-
     @NotNull
     public static ItemStack makeVoucher(long amount) {
         if (amount <= 0) {
@@ -93,36 +84,13 @@ public class Economy extends PersistentState implements EconomyProvider { // TOD
         return voucher;
     }
 
-    public String getBorderFunctionString() {
-        return borderFunctionString;
-    }
-
-    /**
-     * Try to set the border function.
-     *
-     * @param newExpression The string expression to parse.
-     * @param server The server to set the border on
-     * @return True if the function is valid, false if the function is not valid.
-     */
-    public boolean setBorderFunction(String newExpression, @NonNull MinecraftServer server) {
-        Expression newFunction = new ExpressionBuilder(newExpression).variable("points").build();
-        newFunction.setVariable("points", getTotalPoints());
-        if (newFunction.validate().isValid()) {
-            borderFunction = newFunction;
-            borderFunctionString = newExpression;
-            markDirty();
-            WBShop.updateBorder(server);
-            return true;
+    public static Economy readFromNbt(NbtCompound nbt) {
+        var result = CODEC.decode(NbtOps.INSTANCE, nbt.get("economy")).result();
+        if (result.isEmpty()) {
+            Utils.log("WBShop couldn't load the economy. This is normal when you start a new world.");
+            return null;
         }
-        return false;
-    }
-
-    public long getTotalPoints() {
-        long total = 0;
-        for (Account account : accounts.values()) {
-            total += account.balance();
-        }
-        return total;
+        return result.get().getFirst();
     }
 
     /**
@@ -148,6 +116,10 @@ public class Economy extends PersistentState implements EconomyProvider { // TOD
      */
     public ArrayList<Account> getAccountList() {
         return new ArrayList<>(accounts.values());
+    }
+
+    public String getBorderFunctionString() {
+        return borderFunctionString;
     }
 
     public int getConfigVersion() {
@@ -178,7 +150,7 @@ public class Economy extends PersistentState implements EconomyProvider { // TOD
 
     @Override
     public @Nullable EconomyAccount getAccount(MinecraftServer server, GameProfile profile, String accountId) {
-        if (accountId.equals(Account.defaultId().toString())) {
+        if (accountId.equals(Account.POINTS_ACCOUNT)) {
             return accounts.get(profile.getId());
         }
         return null;
@@ -186,12 +158,13 @@ public class Economy extends PersistentState implements EconomyProvider { // TOD
 
     @Override
     public Collection<EconomyAccount> getAccounts(MinecraftServer server, GameProfile profile) {
-        return List.of(accounts.get(profile.getId()));
+        EconomyAccount account = getAccount(server, profile, Account.POINTS_ACCOUNT);
+        return account == null ? Collections.emptySet() : Collections.singleton(account);
     }
 
     @Override
     public @Nullable EconomyCurrency getCurrency(MinecraftServer server, String currencyId) {
-        if (CURRENCY.id().toString().equals(currencyId)) {
+        if (Points.STRING_ID.equals(currencyId)) {
             return CURRENCY;
         }
         return null;
@@ -205,7 +178,7 @@ public class Economy extends PersistentState implements EconomyProvider { // TOD
     @Override
     public @Nullable String defaultAccount(MinecraftServer server, GameProfile profile, EconomyCurrency currency) {
         if (currency == CURRENCY) {
-            return Account.defaultId().toString();
+            return Account.POINTS_ACCOUNT;
         }
         return null;
     }
@@ -235,6 +208,34 @@ public class Economy extends PersistentState implements EconomyProvider { // TOD
 
     public long pointValueOf(Item itemType) {
         return WBShop.globalConfig.getItemValue(itemType);
+    }
+
+    /**
+     * Try to set the border function.
+     *
+     * @param newExpression The string expression to parse.
+     * @param server        The server to set the border on
+     * @return True if the function is valid, false if the function is not valid.
+     */
+    public boolean setBorderFunction(String newExpression, @NonNull MinecraftServer server) {
+        Expression newFunction = new ExpressionBuilder(newExpression).variable("points").build();
+        newFunction.setVariable("points", getTotalPoints());
+        if (newFunction.validate().isValid()) {
+            borderFunction = newFunction;
+            borderFunctionString = newExpression;
+            markDirty();
+            WBShop.updateBorder(server);
+            return true;
+        }
+        return false;
+    }
+
+    public long getTotalPoints() {
+        long total = 0;
+        for (Account account : accounts.values()) {
+            total += account.balance();
+        }
+        return total;
     }
 
     @Override
