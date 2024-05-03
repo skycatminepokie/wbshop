@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
+// Oh gosh I didn't realize how bad the state handling is here
 public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerLifecycleEvents.ServerStarting, ServerLivingEntityEvents.AfterDeath, ServerLifecycleEvents.ServerStopping {
     public static final String MOD_ID = "wbshop";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
@@ -35,10 +36,10 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerLif
      * Fails when world is remote or not loaded.
      */
     public static Economy getEconomy() throws BadStateException { // This shouldn't cause problems with saving/loading, since Minecraft seems to cache it.
-        if (server == null) {
+        if (server == null) { //
             throw new BadStateException("Failed to get economy, server cache was null.");
         }
-        return server.getOverworld().getPersistentStateManager().getOrCreate(Economy::readFromNbt, Economy::new, Economy.SAVE_ID);
+        return Economy.getInstance(server.getOverworld());
     }
 
     /**
@@ -49,7 +50,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerLif
      * @return The economy.
      */
     public static @NonNull Economy getEconomy(@NonNull MinecraftServer server) {
-        return Objects.requireNonNull(server.getOverworld().getPersistentStateManager().getOrCreate(Economy::readFromNbt, Economy::new, Economy.SAVE_ID)); // I'm pretty confident in that requireNonNull.
+        return Objects.requireNonNull(Economy.getInstance(server.getOverworld())); // I'm pretty confident in that requireNonNull.
     }
 
     public static @NonNull Economy getEconomy(@NonNull ServerPlayerEntity player) {

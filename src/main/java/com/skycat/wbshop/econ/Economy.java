@@ -16,6 +16,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.world.PersistentState;
 import net.objecthunter.exp4j.Expression;
@@ -48,8 +49,13 @@ public class Economy extends PersistentState implements EconomyProvider { // TOD
             .variable("points")
             .build();
     private int configVersion = 0;
+    public static Type<Economy> TYPE = new Type<>(Economy::new, Economy::readFromNbt, null);
 
     public Economy() {
+    }
+
+    public static Economy getInstance(ServerWorld overworld) {
+        return overworld.getPersistentStateManager().getOrCreate(TYPE, SAVE_ID);
     }
 
     private Economy(int configVersion, List<Account> accountList, String borderFunctionString) {
