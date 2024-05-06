@@ -98,9 +98,9 @@ public class OverviewGui extends LayeredGui {
         UserCache userCache = server.getUserCache();
         if (userCache != null) {
             Optional<GameProfile> optProfile = userCache.getByUuid(account.owner());
-            profile = optProfile.orElse(new GameProfile(account.owner(), null));
+            profile = optProfile.orElse(new GameProfile(account.owner(), "Unknown!"));
         } else {
-            profile = new GameProfile(account.owner(), null); // This is repeating code but it looks best to me
+            profile = new GameProfile(account.owner(), "Unknown!"); // This is repeating code but it looks best to me
         }
 
         return new GuiElementBuilder(Items.PLAYER_HEAD)
