@@ -103,6 +103,6 @@ public class DonateGui extends SimpleGui { // Slight problem: When force closed 
     @Override
     public void onClose() {
         super.onClose();
-        WBShop.getEconomy(player).getOrCreateAccount(player).donateItems(donationInventory.stacks);
+        WBShop.getEconomy(player).getOrCreateAccount(player).donateItems(donationInventory.heldStacks);
     }
 }
