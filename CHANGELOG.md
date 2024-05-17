@@ -1,1 +1,1 @@
-- Fixed `/wbshop` not working
+- Updated to 1.20.6
