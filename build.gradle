@@ -17,8 +17,6 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.projectlombok:lombok:1.18.26'
-    annotationProcessor 'org.projectlombok:lombok:1.18.26'
     include(implementation 'net.objecthunter:exp4j:0.4.8')
 
     // To change the versions see the gradle.properties file
