@@ -82,7 +82,7 @@ public class Economy extends PersistentState implements EconomyProvider { // TOD
         voucher.setNbt(nbt);
 
         NbtList lore = new NbtList();
-        lore.add(NbtString.of(Text.Serializer.toJson(Text.of(amount + " point" + (amount == 1 ? "" : "s")))));
+        lore.add(NbtString.of(Text.Serialization.toJsonString(Text.of(amount + " point" + (amount == 1 ? "" : "s")))));
 
         voucher.getOrCreateSubNbt("display").put("Lore", lore);
 

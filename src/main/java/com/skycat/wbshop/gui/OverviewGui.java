@@ -79,7 +79,7 @@ public class OverviewGui extends LayeredGui {
         menuBar.setSlot(4, myAccountIcon);
 
         borderInformationIcon = new GuiElementBuilder(Items.FILLED_MAP)
-                .setName(Text.of("Border size: " + ((int) player.getWorld().getWorldBorder().getSize())))
+                .setName(Text.of("Border size: " + ((int) player.method_48926().getWorldBorder().getSize())))
                 .addLoreLine(Text.of("World's total points: " + econ.getTotalPoints()))
                 // TODO: Add algorithm to lore
                 .build();
