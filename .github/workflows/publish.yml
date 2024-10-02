@@ -8,10 +8,10 @@ on:
   workflow_dispatch:
 
 env:
-  MINECRAFT_VERSION: 1.20.1
-  JAVA_VERSION: 17
-  VERSION: 2.0.7+1.20.1
-  VERSION_TYPE: beta
+  MINECRAFT_VERSION: 1.21.1
+  JAVA_VERSION: 21
+  VERSION: 2.0.8+1.21.1
+  VERSION_TYPE: alpha
 
 permissions:
   contents: write

@@ -1,2 +1,1 @@
-- Added the icon to the mod
-- Fixed Economy API compatibility (thanks to @basiqueevangelist for open-sourcing their code)
+- Updated to 1.21.1

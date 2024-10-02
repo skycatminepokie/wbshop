@@ -1,14 +1,14 @@
 package com.skycat.wbshop.econ;
 
+import com.skycat.wbshop.BadStateException;
 import com.skycat.wbshop.WBShop;
 import eu.pb4.common.economy.api.EconomyCurrency;
 import eu.pb4.common.economy.api.EconomyProvider;
-import lombok.SneakyThrows;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class Points implements EconomyCurrency {
-    public static final Identifier ID = Identifier.of(WBShop.MOD_ID, "points");
+    public static final Identifier ID = Identifier.tryParse(WBShop.MOD_ID, "points");
     public static final String STRING_ID = "points";
     @Override
     public Text name() {
@@ -30,9 +30,12 @@ public class Points implements EconomyCurrency {
         return Long.parseLong(value);
     }
 
-    @SneakyThrows
     @Override
     public EconomyProvider provider() {
-        return WBShop.getEconomy();
+        try {
+            return WBShop.getEconomy();
+        } catch (BadStateException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

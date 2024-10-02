@@ -10,7 +10,6 @@ import eu.pb4.common.economy.api.EconomyAccount;
 import eu.pb4.common.economy.api.EconomyCurrency;
 import eu.pb4.common.economy.api.EconomyProvider;
 import eu.pb4.common.economy.api.EconomyTransaction;
-import lombok.SneakyThrows;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -36,7 +35,7 @@ public class Account implements EconomyAccount {
                     "count"
             ).fieldOf("donatedItemCounts").forGetter(Account::getDonatedItemCounts)
     ).apply(account, Account::new));
-    public static final Identifier ID = Identifier.of(WBShop.MOD_ID, POINTS_ACCOUNT);
+    public static final Identifier ID = Identifier.tryParse(WBShop.MOD_ID, POINTS_ACCOUNT);
     private final UUID owner;
     private final HashMap<Item, Long> donatedItemCounts;
     /**
@@ -84,11 +83,15 @@ public class Account implements EconomyAccount {
      * @param stack The stack of items to donate.
      * @return The number of points awarded for donating.
      */
-    @SneakyThrows(BadStateException.class)
     public long donateItems(ItemStack stack) {
         if (stack.getItem() == Items.AIR) return 0;
         long current = donatedItemCounts.getOrDefault(stack.getItem(), 0L);
-        long value = WBShop.getEconomy().pointValueOf(stack);
+        long value;
+        try {
+            value = WBShop.getEconomy().pointValueOf(stack);
+        } catch (BadStateException e) {
+            throw new RuntimeException(e);
+        }
         donatedItemCounts.put(stack.getItem(), current + stack.getCount());
         addBalance(value);
         totalItemsDonated += stack.getCount();
@@ -138,7 +141,6 @@ public class Account implements EconomyAccount {
         return tryTransaction(-value);
     }
 
-    @SneakyThrows(BadStateException.class)
     @Override
     public void setBalance(long value) throws IllegalArgumentException {
         if (value >= 0) {
@@ -147,14 +149,21 @@ public class Account implements EconomyAccount {
             Utils.log("Something tried to set the value of account " + id() + " to " + value + ". Negatives are not allowed, defaulting to 0.", LogLevel.WARN);
             balance = 0;
         }
-        WBShop.getEconomy().markDirty();
-        WBShop.updateBorder();
+        try { // TODO: Fix state handling :sob:
+            WBShop.getEconomy().markDirty();
+            WBShop.updateBorder();
+        } catch (BadStateException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    @SneakyThrows(BadStateException.class)
     @Override
     public EconomyProvider provider() {
-        return WBShop.getEconomy();
+        try {
+            return WBShop.getEconomy();
+        } catch (BadStateException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

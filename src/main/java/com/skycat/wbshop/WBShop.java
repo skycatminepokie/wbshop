@@ -6,7 +6,6 @@ import com.skycat.wbshop.econ.Economy;
 import com.skycat.wbshop.util.LogLevel;
 import com.skycat.wbshop.util.Utils;
 import eu.pb4.common.economy.api.CommonEconomy;
-import lombok.NonNull;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -18,12 +17,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
+// Oh gosh I didn't realize how bad the state handling is here
 public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerLifecycleEvents.ServerStarting, ServerLivingEntityEvents.AfterDeath, ServerLifecycleEvents.ServerStopping {
     public static final String MOD_ID = "wbshop";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
@@ -35,10 +36,10 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerLif
      * Fails when world is remote or not loaded.
      */
     public static Economy getEconomy() throws BadStateException { // This shouldn't cause problems with saving/loading, since Minecraft seems to cache it.
-        if (server == null) {
+        if (server == null) { //
             throw new BadStateException("Failed to get economy, server cache was null.");
         }
-        return server.getOverworld().getPersistentStateManager().getOrCreate(Economy::readFromNbt, Economy::new, Economy.SAVE_ID);
+        return Economy.getInstance(server.getOverworld());
     }
 
     /**
@@ -48,11 +49,11 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerLif
      * @param server The server to grab the economy from.
      * @return The economy.
      */
-    public static @NonNull Economy getEconomy(@NonNull MinecraftServer server) {
-        return Objects.requireNonNull(server.getOverworld().getPersistentStateManager().getOrCreate(Economy::readFromNbt, Economy::new, Economy.SAVE_ID)); // I'm pretty confident in that requireNonNull.
+    public static @NotNull Economy getEconomy(@NotNull MinecraftServer server) {
+        return Objects.requireNonNull(Economy.getInstance(server.getOverworld())); // I'm pretty confident in that requireNonNull.
     }
 
-    public static @NonNull Economy getEconomy(@NonNull ServerPlayerEntity player) {
+    public static @NotNull Economy getEconomy(@NotNull ServerPlayerEntity player) {
         MinecraftServer server = player.getServer();
         assert server != null;
         return getEconomy(server);
@@ -72,7 +73,7 @@ public class WBShop implements ModInitializer, ServerWorldEvents.Load, ServerLif
         updateBorder(server);
     }
 
-    public static void updateBorder(@NonNull MinecraftServer server) {
+    public static void updateBorder(@NotNull MinecraftServer server) {
         Economy economy = getEconomy(server);
         server.getOverworld().getWorldBorder().setSize(economy.evaluateBorderSize(economy.getTotalPoints()));
     }

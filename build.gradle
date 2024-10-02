@@ -17,8 +17,6 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.projectlombok:lombok:1.18.26'
-    annotationProcessor 'org.projectlombok:lombok:1.18.26'
     include(implementation 'net.objecthunter:exp4j:0.4.8')
 
     // To change the versions see the gradle.properties file
@@ -30,7 +28,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     include(modImplementation('me.lucko:fabric-permissions-api:0.2-SNAPSHOT'))
-    modImplementation include("eu.pb4:sgui:1.2.2+1.20")
+    modImplementation include("eu.pb4:sgui:1.6.1+1.21.1")
     modImplementation include("eu.pb4:common-economy-api:1.1.1")
 }
 
@@ -47,7 +45,7 @@ processResources {
     }
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 tasks.withType(JavaCompile).configureEach {
     // ensure that the encoding is set to UTF-8, no matter what the system default is
     // this fixes some edge cases with special characters not displaying correctly

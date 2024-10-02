@@ -3,7 +3,7 @@
   "id": "wbshop",
   "version": "${version}",
   "name": "wbshop",
-  "description": "",
+  "description": "Fight the border for every block!",
   "authors": [
     "skycatminepokie"
   ],
@@ -22,7 +22,7 @@
     "wbshop.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=${loader_version}",
+    "fabricloader": ">=0.14.22",
     "fabric": "*",
     "minecraft": "${minecraft_version}"
   }
