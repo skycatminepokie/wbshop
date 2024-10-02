@@ -35,7 +35,7 @@ public class Account implements EconomyAccount {
                     "count"
             ).fieldOf("donatedItemCounts").forGetter(Account::getDonatedItemCounts)
     ).apply(account, Account::new));
-    public static final Identifier ID = Identifier.of(WBShop.MOD_ID, POINTS_ACCOUNT);
+    public static final Identifier ID = Identifier.tryParse(WBShop.MOD_ID, POINTS_ACCOUNT);
     private final UUID owner;
     private final HashMap<Item, Long> donatedItemCounts;
     /**
